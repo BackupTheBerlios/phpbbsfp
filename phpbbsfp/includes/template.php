@@ -60,14 +60,15 @@ define('XS_TPL_ANY', '/templates/');
 define('XS_TAG_NONE', 0);
 define('XS_TAG_PHP', 1);
 define('XS_TAG_BEGIN', 2);
-define('XS_TAG_END', 3);
-define('XS_TAG_INCLUDE', 4);
-define('XS_TAG_IF', 5);
-define('XS_TAG_ELSE', 6);
-define('XS_TAG_ELSEIF', 7);
-define('XS_TAG_ENDIF', 8);
-define('XS_TAG_DEFINE', 9);
-define('XS_TAG_UNDEFINE', 10);
+define('XS_TAG_BEGINELSE', 3);
+define('XS_TAG_END', 4);
+define('XS_TAG_INCLUDE', 5);
+define('XS_TAG_IF', 6);
+define('XS_TAG_ELSE', 7);
+define('XS_TAG_ELSEIF', 8);
+define('XS_TAG_ENDIF', 9);
+define('XS_TAG_DEFINE', 10);
+define('XS_TAG_UNDEFINE', 11);
 
 
 class Template {
