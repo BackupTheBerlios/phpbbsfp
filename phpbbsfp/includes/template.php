@@ -129,7 +129,7 @@ class Template {
 
 	// counter for include
 	var $include_count = 0;
-
+var $block_else_level = array();
 	// php extension. will be replaced by $phpEx in Template() function unless you disable it there
 	var $php = 'php';
 
@@ -1333,6 +1333,10 @@ class Template {
 					{
 						$keyword_type = XS_TAG_BEGIN;
 					}
+					if($keyword === 'BEGINELSE')
+					{
+						$keyword_type = XS_TAG_BEGINELSE;
+					}
 					elseif($keyword === 'END')
 					{
 						$keyword_type = XS_TAG_END;
@@ -1392,6 +1396,7 @@ class Template {
 			*/
 			if($keyword_type == XS_TAG_BEGIN)
 			{
+				$this->block_else_level[] = false;
 				$params = explode(' ', $params_str);
 				$num_params = count($params);
 				// get variable name
@@ -1489,7 +1494,8 @@ class Template {
 					$block_items[$var] = 1;
 				}
 				$line = '<'."?php\n\n";
-				$lines = "\n" . 'for ($'. $var. '_i = 0; $'. $var. '_i < $'. $var. '_count; $'. $var. '_i++)';
+				$lines = "\n" . 'if($'. $var. '_count){';
+				$lines .= "\n" . 'for ($'. $var. '_i = 0; $'. $var. '_i < $'. $var. '_count; $'. $var. '_i++)';
 				$lines .= "\n". '{'. "\n";
 				if ($block_nesting_level < 2)
 				{
@@ -1533,6 +1539,14 @@ class Template {
 				continue;
 			}
 			/*
+			* <!-- BEGINELSE -->
+			*/
+			if($keyword_type == XS_TAG_BEGINELSE)
+			{
+				$this->block_else_level[sizeof($this->block_else_level) - 1] = true;
+				$compiled[] = '<?php }} else { ?>';
+			}
+			/*
 			* <!-- END -->
 			*/
 			if($keyword_type == XS_TAG_END)
@@ -1569,7 +1583,7 @@ class Template {
 				}
 				// We have the end of a block.
 				$line = '<'."?php\n\n";
-				$line .= '} // END ' . $var . "\n\n";
+				$line .= ((array_pop($this->block_else_level)) ? '}' : '}}') . ' // END ' . $var . "\n\n";
 				$line .= 'if(isset($' . $var . '_item)) { unset($' . $var . '_item); } ';
 				$line .= "\n\n?".">";
 				if(isset($block_items[$var]))
@@ -1840,7 +1854,7 @@ class Template {
             }
         }
 
-		 $code = (($elseif) ? '} elseif (' : 'if (') . ((XS_USE_ISSET) ? 'isset(' . $tokens[0] . ') && ' : '') . implode(' ', $tokens) . ') { ';
+		 $code = (($elseif) ? '} elseif (' : 'if (') . (implode(' ', $tokens) . ') { ');
 	
 		return $code;
 	}
