@@ -1,7 +1,7 @@
 <?php
 //--------------------------------------------------------------------------------------------------
 //
-// $Id: template.php,v 1.1 2004/08/30 21:30:06 dmaj007 Exp $
+// $Id: template.php,v 1.2 2004/09/01 00:47:56 dmaj007 Exp $
 //
 // FILENAME  : template.php
 // STARTED   : Tue Jan 1, 2004
@@ -1771,7 +1771,7 @@ class Template {
 			}
 		}
  
-		$code = (($elseif) ? '} elseif (' : 'if (') . ((XS_USE_ISSET) ? 'isset(' . $tokens[0] . ') && ' : '') . implode(' ', $tokens) . ') { ';
+		$code = (($elseif) ? '} elseif (' : 'if (') . (implode(' ', $tokens) . ') { ');
 
 		return $code;
 	}
