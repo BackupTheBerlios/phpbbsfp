@@ -1,6 +1,6 @@
 <?php
 
-// $Id: functions_subforums.php,v 1.7 2004/09/02 04:05:07 dmaj007 Exp $
+// $Id: functions_subforums.php,v 1.8 2004/09/02 04:29:36 dmaj007 Exp $
 
 function display_forums($root_data = '', $display_moderators = TRUE)
 {
@@ -276,7 +276,7 @@ print_r ($db->sql_error());
 			$last_post_time = $user->format_date($row['post_time']);
 
 			$last_poster = ($row['username'] != '') ? $row['username'] : $user->lang['GUEST'];
-			$last_poster_url = ($row['username'] == ANONYMOUS) ? '' : append_sid("profile.$phpEx?mode=viewprofile&amp;u="  . $row['user_id']);
+			$last_poster_url = ($row['user_id'] == ANONYMOUS) ? '' : append_sid("profile.$phpEx?mode=viewprofile&amp;u="  . $row['user_id']);
 
 			$last_post_url = append_sid("viewtopic.$phpEx?f=" . $row['forum_id_last_post'] . '&amp;p=' . $row['forum_last_post_id'] . '#' . $row['forum_last_post_id']);
 		}
@@ -301,7 +301,7 @@ print_r ($db->sql_error());
 			'S_IS_CAT'			=> false, 
 			'S_IS_LINK'			=> ($row['forum_type'] != FORUM_LINK) ? false : true, 
 
-			'LAST_POST_IMG'		=> $user->img('icon_post_latest', 'VIEW_LATEST_POST'), 
+			'LAST_POST_IMG'		=> $user->img('icon_latest_reply', 'VIEW_LATEST_POST'), 
 
 			'FORUM_ID'			=> $row['forum_id'], 
 			'FORUM_FOLDER_IMG'	=> ($row['forum_image']) ? '<img src="' . $phpbb_root_path . $row['forum_image'] . '" alt="' . $folder_alt . '" border="0" />' : $user->img($folder_image, $folder_alt),
@@ -322,7 +322,6 @@ print_r ($db->sql_error());
 			'U_LAST_POST'		=> $last_post_url, 
 			'U_VIEWFORUM'		=> ($row['forum_type'] != FORUM_LINK || $row['forum_flags'] & 1) ? append_sid("viewforum.$phpEx?f=" . $row['forum_id']) : $row['forum_link'])
 		);
-			print_r($row);
 	}
 
 	$template->assign_vars(array(
