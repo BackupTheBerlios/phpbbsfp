@@ -1,0 +1,17 @@
+Type definition lookup table for various DBMS.
+
+MySQL           Postgres                                    MS-SQL
+
+AUTOINCREMENT   DEFAULT nextval('phpbb_xxx_id_seq'::text)   IDENTITY (1, 1)
+
+TINYINT(1)      int2                                        [smallint]
+TINYINT(4)      int2                                        [smallint]
+MEDIUMINT(8)    int4                                        [int]
+INT(6)          int4                                        [int]
+INT(20)         int4                                        [int]
+BIGINT(20)      int8                                        [bigint]
+
+CHAR(1)         char(1)                                     [char] (1)
+CHAR(8)         char(8)                                     [char] (8)
+VARCHAR(255)    varchar(255)                                [varchar] (255)
+TEXT            text                                        [text]

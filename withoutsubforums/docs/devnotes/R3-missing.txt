@@ -1,0 +1,80 @@
+Missing from R3
+~~~~~~~~~~~~~~~
+
+Core
+~~~~
+
+Send PM On User Registration 1.0.2
+- http://www.phpbb.com/phpBB/viewtopic.php?t=72745
+
+Automatic PM Response 1.0.3
+- http://www.phpbbhacks.com/viewhack.php?id=1985
+
+Block PM 1.0.0
+- http://www.bern4u.ch/ecp/BlockPM.txt
+
+FAQ Admin 0.3.1
+- http://phpbb.com/phpBB/viewtopic.php?t=125989
+
+Deny Permission 0.6.2
+- http://www.phpbb.com/phpBB/viewtopic.php?t=50699
+- http://www.orvp.net
+
+Protect User Accounts 1.1.8 (Approved 19th May 2003)
+- http://mods.db9.dk/viewforum.php?f=43
+
+Error Mod 0.0.1
+- http://www.phpbb.com/phpBB/viewtopic.php?t=107493
+
+Sort Smiles 0.2.0
+- http://www.phpbb.com/phpBB/viewtopic.php?t=100235
+
+Smilies Upload 1.1.0
+- http://darkmods.sourceforge.net
+
+Restrict Images in Posts 0.3.0
+- http://www.phpbbhacks.com/viewhack.php?id=1590
+
+Font Face BBCode 1.0.4
+- http://www.phpbb.com/phpBB/viewtopic.php?t=114916
+
+XtraColors 1.0
+- http://www.phpbb.com/phpBB/viewtopic.php?t=128255
+
+Forum
+~~~~~
+
+FI Moved Folder
+- http://www.forumimages.com/info/mods/moved_folder.php
+
+Poll Topic Folder Icon 1.0
+- http://www.phpbb.com/phpBB/viewtopic.php?t=72847
+
+Mini Reply & Locked Button 1.0
+
+No ALL CAPS Subjects
+- http://www.phpbb.com/phpBB/viewtopic.php?t=15598
+
+Moderator Post Notifiaction 1.2.5 (Approved 19th May 2003)
+- http://www.netclectic.com
+
+Rebuild Search Index 1.2
+- http://www.phpbb.com/phpBB/viewtopic.php?t=19630
+
+Show Editted By 1.04
+- http://www.shannado.nl/forumorg/
+- http://www.phpbb.com/phpBB/viewtopic.php?t=17331
+
+Topic Description 1.0.1
+- http://morpheus.2037.biz
+
+Forum Notify 1.04a
+- http://www.pda0.net/foro/viewtopic.php?t=406
+- http://www.phpbb.com/phpBB/viewtopic.php?t=60547
+
+Forum Features 1.0.0
+- http://www.coasterphotography.com/mods/
+- Used this mod as the basis to develop my own interpretation.
+
+Search Engine Optimization 1.0.0
+- http://www.phpbb.com/phpBB/viewtopic.php?t=152036

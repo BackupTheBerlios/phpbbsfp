@@ -1,0 +1,496 @@
+Minerva R3 Roadmap - Living Document v1.2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Last Update : 10th August 2004
+
+This is document is dynamic, and serves as a Roadmap through the mile stones and work list.
+If you find yourself at a loose end, pick a job from the list below, check that no
+one else is working on it already and post a message in the forums stating that you are
+working on it.
+
+Everything here is up for discussion, thoughts, comments and suggestions are welcome.
+
+Milestone 1
+~~~~~~~~~~~
+
+Goal : If you see the oppotunity to improve the performance or efficiency, do it!
+
+Source Headers
+ - As you edit or created new .php files replace all the source headers with the new header
+   format, ** but make sure you retain any valid copyrights! **
+
+//--------------------------------------------------------------------------------------------------
+//
+// $Id: R3-Roadmap.txt,v 1.1 2004/08/30 21:30:06 dmaj007 Exp $
+//
+// FILENAME  : file.php
+// STARTED   : Tue Jan 1, 2004
+// COPYRIGHT : © 2003, 2004 Project Minerva Team and © 2001, 2003
+//           : © 2002, 2003 Any other person or group ** EXAMPLE **
+// WWW       : http://www.project-minerva.org/
+// LICENCE   : GPL v2.0 [ see /docs/COPYING ]
+//
+//--------------------------------------------------------------------------------------------------
+
+ACM
+ - The following tables are the priority for caching in M1
+    * $table_prefix.'acronyms'
+    * $table_prefix.'smart'
+    * $table_prefix.'config'
+    * $table_prefix.'flags'
+    * $table_prefix.'modules'
+    * $table_prefix.'ranks'
+    * $table_prefix.'referers'
+    * $table_prefix.'rules'
+    * $table_prefix.'smilies'
+    * $table_prefix.'themes'
+    * $table_prefix.'themes_name'
+    * $table_prefix.'words'
+    * $table_prefix.'blocks'
+    * $table_prefix.'block_position'
+    * $table_prefix.'block_layout'
+    * $table_prefix.'block_config'
+    * $table_prefix.'block_variable'
+    * $table_prefix.'menu_links'
+    * $table_prefix.'user_menu_links'
+    * $table_prefix.'user_portal_links'
+
+XHTML Comliance
+ - If you are adding or updating a .tpl help Dave out by checking for common
+   XHTML errors, such as...
+
+     * <br /> instead of <br>
+     * <input xxxx /> instead of <input xxxx>
+     * <img src=xxxx /> instead of <img src=xxxx>
+     * Example XHTML compliant JavaScript
+
+     <script language="Javascript" type="text/javascript">
+     //<![CDATA[
+     if ( {PRIVATE_MESSAGE_NEW_FLAG} )
+     {
+        window.open('{U_PRIVATEMSGS_POPUP}', '_minervaprivmsg', 'HEIGHT=225,resizable=yes,WIDTH=400');;
+     }
+     //]]>
+     </script>
+
+Module Engine
+ - Module interoperability functions
+     * Extend the modules API with some functions to query the status of other modules.
+       This is useful if we want to write a module or block which can draw data from several
+       other modules based on their status, version, etc...
+
+       GetmvInstalled($status);                 returns a list of installed modules of the given status
+       GetmvModuleStatus($modulename);          returns the status of the given module
+       GetmvModuleVersion($modulename);         returns the version of the given module
+       IsmvModuleDefault($modulename);          returns true if the given module is default
+       GetmvModuleRootPath($modulename);        returns the module root path of the given module, in the forum 'index.php?module=name'
+       GetmvFilePath($modulename, $filename);   returns a correctly formatted path to the given file for the given module.
+       GetmvDependacy($modulename);             returns the given modules version number if is it currently installed and active.
+
+PCP 2.1.1 Upgrade
+ - This upgrade is most desirable because it fixes various bugs, including the following issues...
+    * http://rpgnet.clanmckeen.com/demo/viewtopic.php?t=1714
+
+   The Memberlist doesn't work for non Admins after fresh install and a number of settings are not correctly
+   initialised after a fresh install. The work around is to configure everything in the Configuration+ ACP to Yes
+   and then go back and setup the options how your really want them.
+
+   This upgrade needs to be carefully merged in so as not to break the Advanced PM system, add any of Ptirhiiks cache
+   back in or break any additions we have already made the the PCP. The APM is known to not work with PCP 2.1.1 by default,
+   but I have seen reports that it can be made to work...
+
+    * http://rpgnet.clanmckeen.com/demo/viewtopic.php?p=14393#14393
+
+   Although I have not assigned anyone to this task I would really like club60.org to take it on, because I have some ideas
+   for M2 which integrate the PCP and module engine therefore it would be valuable if he has an intimate understanding of how
+   the PCP hangs together.
+
+Block Engine
+ - Stop duplicate layout names being created in the ACP.
+ - Any block specific configuration options should be configurable
+   via that blocks edit screen in the ACP, not from the general
+   Block Configuration ACP screen.
+
+CustomBBCode
+ - Dave to integrate new bbCode parser and CustomBBCode
+ - We can bump this to M2 if need be as we have a functional bbcode parser currently.
+
+Rules
+ - Currently Supports
+    * Site Rules
+    * Forum Rules
+    * Terms of Use
+    * Privacy Policy
+    * Copyright Notice
+ - Remove the Configuration+ option for enabling rules, they are now only displayed if they have content.
+ - Relocate where the forum rules are displayed. Displaying them at the top of the forum is a bit intrusive.
+   Maybe include them with the list of forum capabilities, something like...
+     'You *should* read our rules in this forum' at the top of the list.
+ - When registering the Site Rules should be displayed if they exist and links to the Terms and Privacy policy should
+   be displayed if they are populated too.
+
+Advanced PM
+ - Legacy PM code needs converting, just the Attachment mod to go.
+ - Integrate Attachment support, need doing because some of the Attachment ACP is broken.
+
+Prillian
+ - Integrate cross browser compatible Javascript (posting.js)
+
+PayPal Group Subscriptions
+ - Make it DBAL compliant and the ACP does not work correctly.
+ - There is a problem when viewing your groups, sometimes it displays "No Groups Exist"
+ - If you get this error add a normal non-subscription based group. When there is at least
+   one normal non-subscription based (open or closed) group you will not see this error
+   message. If you have only subscription based and hidden groups you will see this error.
+
+Advanced Post Count
+ - club60.org has integrated his advanced post count mod and will enhance it futher by adding Post Count
+   Resyncing to it and removing the seperate Post Count Resync ACP.
+
+FAQ
+ - Migrate the FAQ to 'Online Minerva Help' for users.
+ - Mostly a simple name change, so that a 'proper' FAQ module could be written.
+
+Group Priorities
+ - We need a new field adding to the 'phpbb_groups' called 'group_priority'.
+ - We also need a new ACP for managing the Group priority.
+ - The reason for adding these new features will become apparent in the future, but the
+   basic reason is so when we have Ranks for Groups and Colour Groups re-integrated in the core,
+   a users group colour and/or group rank will be derived from the group they belong to with the
+   highest priority.
+
+Spell Checker
+ - The OpenSpell(); JavaScript function needs updating so that the spell checker can be used within
+   modules.
+
+Word Censors
+- More powerful word censor
+
+Milestone 2
+~~~~~~~~~~~
+
+More Performance Tweaks
+ - http://www.phpbb.com/phpBB/viewtopic.php?t=135383
+ - How much can we use from the examples posted in this topic?
+
+Attachments
+ - Anti Leech options in 'download.php' should be ACP configurable.
+ - Maybe even added to board_config, so the same code in Photo Album could use a site wide config?
+
+Post Icons
+ - Use DB for configuration settings, not the current Ptirhiik config file.
+
+Wider Group Usage
+ - Pay Cash (virtual cash) to join a group. Make this part of PayPal Groups Subscriptions so admins can select if a group is a paypal or cash subscription.
+ - Custom Title capabilities should optionally be based on a Group membership.
+ - Avatar capabilities should optionally be based on Group membership.
+ - What else could be group membership retricted?
+    * The reason for making more features group membership restricted is so admins can make better use of cash for controlling
+      who has what capabilities, therefore giving cash some 'real' value. I also want to get away from capabilities being controlled by post count and
+      length of membership. Length of membership is still valid, but post count is not it promotes spamming to gain permissions.
+    * If an admin wants to run some kind of 'pay' site they can use PayPal Group Subscriptions to get revenue for certain capabilities and features.
+ - Add the Group Ranks mod    [ Group Priorities in M1 need to be completed first and integrated into this mod ]
+ - Add the Colour Groups mod  [ Group Priorities in M1 need to be completed first and integrated into this mod ]
+    * http://www.phpbb.com/phpBB/viewtopic.php?t=216790
+
+Admin Tools
+ - There are a number of mods which need adding to imporve the tools available to admins to manage their site.
+ - I will add details of required features here when M2 is underway.
+    * Potect User Accounts
+
+Yellow Card
+ - Tune/enhance the Yellow Card mod.
+
+Modules and Blocks
+ - Dave has already done some work on module uploading
+     * More details to come from Dave nearer completion
+     * Blocks should be uploadable too.
+ - Integrate the modules into the Online Help system, dependant on M1 task completion.
+
+Unix Sendmail Support
+ - Add Unix sendmail support to the emailer class for improved e-mail delivery on system with sendmail available.
+
+Configuration ACP Consolidation [ ** DO NOT START WITHOUT GETTING AGREEMENT FROM MARTIN ** ]
+ - Move the remaining Configuration Items from Configuration to Configuration+
+
+Menu Manager                    [ ** DO NOT START WITHOUT GETTING AGREEMENT FROM MARTIN ** ]
+ - Move the Administrative configuration features to the ACP
+ - Move the User configuration options to the PCP
+
+Functionise User Deletion
+ - User deletions currently take place in several locations and the code is almost identical in each...
+    * admin/admin_users.php
+    * admin/admin_users_inactive.php
+    * includes/mods_settings/mod_profile_control_panel.php
+ - A single function, delete_user(); would be useful.
+
+Sessions and Online SearchBots
+ - Back port phpBB 2.1.x code?
+ - Martin has added UserAgent and SearchBot capabilities to the existing sessions code.
+
+Content Abstraction Layer
+ - R3 should be able to server content in any of the following formats...
+    * XHTML for Browsers
+    * PDA (simple HTML) for PDAs
+    * WML for Cell phones
+    * XML for RSS readers
+
+ - To do this I propose we add a hidden HTTP post variable 'content'. When 'content=xhtml' or is not
+   defined then the current 'normal' template is used, when 'content=xml' the the 'templates/xml' template
+   is used so long as it exists, and so on for WML and PDA...
+
+ - I think this approach would make it easy to design templates for publishing content in any number of formats.
+   Clearly this is just a rough idea, but we can discuss the concept in the forums.
+
+
+Upgrade/Migration Script(s)
+ - What upgrade paths will we support?
+
+Removing phpBB                  [ ** DO NOT START WITHOUT GETTING AGREEMENT FROM MARTIN ** ]
+ - Seek out the remaining phpBB references (not copyrights!) and remove them.
+     * A good deal of this is already done.
+     * This includes defines and DB prefixes.
+
+Mod Author Approvals
+ - Every MOD integrated into R3 should have approval from the original author,
+   or we have tried our best to get that approval.
+
+Multiple Choice Voting
+ - http://www.vilaras.gr/multivote_mod/
+ - Update Poll Block and Poll Overview Module
+
+JavaScript rationalisation
+ - Move the Javascript ou of the templates into temaplates/subSilver/js/file.js
+ - Include 're-usable' JavaScript code rather than having the same stuff
+   repeated in multiple templates.
+
+Referers Replacement
+- Remove existing referers mod.
+- Replace with http://www.phpbb.com/phpBB/viewtopic.php?t=188175
+
+Milestone 3
+~~~~~~~~~~~
+
+Create a new default style/template for R3.
+ - Probably dervied from subSilver to some extent.
+ - CSS use needs rationalising
+ - All the images need replacing with our own that we can
+   release under the GPL. Everaldo already approved the use
+   of the Crystal icons should we need them.
+     * http://www.everaldo.com
+ - R3 GDK
+ - R3 SDK
+    * Move the PCP and Extended Lang ACP stuff to a module.
+
+Documentation
+ - Administrator Guides
+    * Installion, configuration and management of R3.
+ - Developer Guides
+    * Minerva Certified Module Program
+    * Minerva Certified Block Program
+    * Module and Block which are certified by the Project Minerva Team meet certain
+      coding practices. We need to define what these criteria are and create a
+      certification request form outlining them all.
+
+The future?
+~~~~~~~~~~~
+
+I am quite happy to move these things into M1, M2 or M3, but I need more feedback
+and ideas for the rest of the development team to better understand what needs
+to be done exactly. On receipt of additional information I can reschedule them.
+
+APIs
+ - Topic/Post Insertion
+     * insert_post() to be added to includes/functions_messages.php
+       remove duplicate function from KB, News and Weblinks modules.
+
+ - PM Insertion                  (see includes/functions_messages.php)
+     * send_pm()
+
+ - Cash                          (see includes/functions_cash.php)
+
+ - Modules                       (see includes/modules.php)
+
+ - Blocks
+
+File Structure.
+ - Rationalise the core file layout.
+
+Object Orientatation
+
+Ptirhiik Variable Maps
+ - Can we migrate the contents of 'profilcp/def/' to the DB and cache them via the ACM?
+     * def_userfields.php
+     * def_userfields_phpbb.php
+     * def_userfuncs.php
+     * def_userfuncs_custom.php
+     * def_userfuncs_std.php
+     * def_userfuncs_vlist.php
+     * def_usermaps.php
+
+Junior Admin
+ - Keep Nivisec code (and extended it) or back port the 2.1x Junior Admin?
+ - Martin would prefer to extend the Jnr. Admin code.
+
+Text Editor
+ - Could we replace the standard post/text editor with something better?
+ - What about an optional WYSIWYG editor?
+    * http://www.kevinroth.com/rte/demo.htm
+
+DBMS Compatibility
+ - I would love for R3 to support all the DBMS platforms that phpBB 2.1/2.2 does.
+ - We probably need some new developers (DBAs) to help with this?
+
+Unified Searching
+ - Anything which has a search capability, forums, modules, member list, etc,
+   should be searchable via a single search screen.
+
+The Modules
+~~~~~~~~~~~
+
+Goal :  All modules which use comments should use the same forum based system
+        as utilised in the KB module.
+
+This just covers what I consider to be the major modules. We already have
+numerous others.
+
+Forum       [ 0% ]
+ - Make the forum a module.
+ - Comments, thoughts?
+
+News        [ 85% ]
+  - Add email to a friend and export to text to compliment Printer Friendly.
+  - Approve/Unapprove/Delete icons should be in the main article view and nowhere else.
+  - Uninstall needs to properly cleanup after itself, removing topics etc...
+  - Improve navlinks when browsing articles, categories. More information required about what you are looking at exactly.
+  - Add news image and number of articles to the fall back category index.
+  - Attachment support.
+  - News icons should be in the template, not '/images/news'
+
+Web Links   [ 65% ]
+ - Add email to a friend and export to text to compliment Printer Friendly.
+ - Approve/Unapprove/Delete icons should be in the main article view and nowhere else.
+ - Uninstall needs to properly cleanup after itself, removing topics etc...
+ - iframe preview should be configurable. On or Off.
+ - Views should increment when opening the Link not reading description page.
+ - Main index page needs at layout change, all the sub-cats for a category should be shown. For example...
+
+   Category One                 Category Two                Category Three
+    - Category weebles           - Category tinkle           - Fu
+    - Category wobble            - Category sprinkle         - Bar
+    - Category winkle
+
+KB          [ 90% ]
+  - Add email to a friend and export to text to compliment Printer Friendly.
+  - Approve/Unapprove/Delete icons should be in the main article view and nowhere else.
+  - Uninstall needs to properly cleanup after itself, removing topics etc...
+  - Attachment support.
+
+paFileDB    [ 85% ]
+  - Replace the comment system, with the same system used by the KB.
+  - New file additions should use the same notification system as the KB.
+  - Add RSS Feed.
+
+Photo Album [ 80% ]
+  - Replace the comment system, with the same system used by the KB.
+  - New picture additions should use the same notification system as the KB.
+  - Add RSS Feed.
+  - Improve/consolidate the automatic GD detection code.
+
+  - TODO : SlideShow                        [ http://smartor.is-root.com/viewtopic.php?t=11080 ]
+      * Possible Configurable Option        [ http://smartor.is-root.com/viewtopic.php?p=43494#43494 ]
+        If Mid-sized thumbs are disbaled used the full pic.
+  - TODO : Resize picture on upload         [ http://smartor.is-root.com/viewtopic.php?p=31762#31762 ]
+  - TODO : Picture Size and Dimensions      [ http://smartor.is-root.com/viewtopic.php?t=10880 ]
+      * You would need a working GD for this to be of any use.
+  - TODO : HTML Thumbnails                  [ http://smartor.is-root.com/viewtopic.php?t=6295 ]
+  - TODO : Replace the comment system, with the same system used by the KB.
+  - TODO : Add a notification of new photos using the KB notification system.
+  - TODO : ImageMagick support for thumbnails and watermarking.
+
+Foing       [ 50% ]
+  - Based on foing 0.7.0 from R2.
+  - Needs to be made module compliant.
+
+Activity    [ 70% ]
+ - Needs attention, the game pop-ups don't work.
+ - ACP templates need cleaning up.
+
+ADR         [ 50% ]
+ - Needs attention, adr.php is empty.
+
+Hacks Lists [ 95% ]
+ - If modules have a 'hl/' directory, pull in their data.
+ - Rename to 'Code Credits'.
+
+Ideas for Modules
+~~~~~~~~~~~~~~~~~
+
+Note : You don't have to create these modules, they are list here purely as examples
+       of what we other users, or Wimpy <grin>,  might find useful.
+
+Radio
+
+Banners
+ - ACP Stuff should be a module
+ - Actually banner displays should be blocks.
+
+phpBBToGo : Convert it to a complete PDA/WAP friendly portal
+ - Home Page
+ - Forums (with Category support)
+ - News Module
+
+RSS Syndication
+ - Forums
+
+Member Webpages or Blogs
+
+Statistics
+- http://www.opentools.de
+- Module Weekly Top Posters 2.1.3
+- Module Monthly Top Posters 2.1.3
+- Module Gender 1.3
+- Module Countries 1.0.0
+- Last Reg - Last Active - Most points 1.00 (Approved 19th May 2003)
+    http://www.opentools.de
+- Age Statistics 1.02
+    http://www.phpbbhacks.com/viewhack.php?id=862
+- Top Referrers Statistics Modules 1.0.0
+    http://www.leforumanous.be.tf
+
+ChatBox 3.01
+- http://www.xgmag.com/downloads/phpbb/mods/chatbox.php
+- http://smartor.is-root.com/viewtopic.php?t=2230
+- Included browser compatibility fixes and integrated it into the Portal page.
+
+System Specs and Benchmarks 0.13.0
+- http://www.phpbb.com/phpBB/viewtopic.php?t=102869
+- http://forum.crucialpc.com/
+
+Calendar
+- http://rpgnet.clanmckeen.com/demo/viewtopic.php?t=398
+
+[FIX] http://rpgnet.clanmckeen.com/demo/viewtopic.php?t=3123
+[ADD] http://rpgnet.clanmckeen.com/demo/viewtopic.php?t=3276
+[REF] http://www.mojavelinux.com/forum/viewtopic.php?t=219
+
+phpBBAuction
+ - http://www.phpbb-auction.com/index.php
+ - http://www.phpbb-auction.com/viewtopic.php?t=19
+
+osCommerce
+ - http://aikenlin.idv.tw/oscphpbb2/
+
+The Blocks
+~~~~~~~~~~
+
+Port over the appropriate blocks from IM Portal. Some ideas...
+
+R3 Block Candiate
+~~~~~~~~~~~~~~~~~
+
+miniCal 2.0.4
+- http://www.netclectic.com
+
+New Content Block 1.0.0
+- http://www.flexion.org

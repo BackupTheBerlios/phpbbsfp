@@ -1,0 +1,1600 @@
+//--------------------------------------------------------------------------------------------------
+//
+// $Id: R3-DB-Changes.txt,v 1.1 2004/08/30 21:30:06 dmaj007 Exp $
+//
+// FILENAME  : R3-DB-Changes.txt
+// STARTED   : Tue Jan 1, 2004
+// COPYRIGHT : © 2003, 2004 Project Minerva Team
+// WWW       : http://www.project-minerva.org/
+// LICENCE   : GPL v2.0 [ see /docs/COPYING ]
+//
+//--------------------------------------------------------------------------------------------------
+
+//
+// Note phpbb_config now has 3 cols ;)
+//
+
+This file is simply used to track what DB modifications have been made for Minerva R3 vs phpBB 2.0.8a.
+If am hoping to use it a reference, so that I can get the R3 core compliant with MySQL, Postgres and
+MS-SQL.
+
+MySQL
+~~~~~
+
+August 26th 2004
+~~~~~~~~~~~~~~~~
+DROP TABLE phpbb_topics_action_log;
+
+CREATE TABLE phpbb_log (
+  log_id mediumint(8) UNSIGNED DEFAULT '0' NOT NULL auto_increment,
+  log_type tinyint(4) UNSIGNED DEFAULT '0' NOT NULL,
+  user_id mediumint(8) DEFAULT '0' NOT NULL,
+  forum_id mediumint(8) UNSIGNED DEFAULT '0' NOT NULL,
+  topic_id mediumint(8) UNSIGNED DEFAULT '0' NOT NULL,
+  reportee_id mediumint(8) UNSIGNED DEFAULT '0' NOT NULL, 
+  log_ip varchar(8) NOT NULL,
+  log_time int(11) NOT NULL,
+  log_operation text,
+  log_data text,
+  PRIMARY KEY (log_id),
+  KEY log_type (log_type),
+  KEY forum_id (forum_id),
+  KEY topic_id (topic_id),
+  KEY reportee_id (reportee_id), 
+  KEY user_id (user_id)
+);
+
+August 16th 2004
+~~~~~~~~~~~~~~~~
+
+ALTER TABLE phpbb_sessions DROP useragent;
+ALTER TABLE phpbb_groups ADD group_priority MEDIUMINT( 8 ) DEFAULT '-1' NOT NULL AFTER group_description ;
+
+August 9th 2004
+~~~~~~~~~~~~~~~
+
+ALTER TABLE phpbb_topics ADD topic_desc varchar(255) DEFAULT '' AFTER topic_title;
+
+August 5th 2004
+~~~~~~~~~~~~~~~
+
+CREATE TABLE phpbb_admin_nav_module (
+  user_id mediumint(8) NOT NULL default '0',
+  modulname varchar(200) NOT NULL default ''
+);
+
+
+August 4th 2004
+~~~~~~~~~~~~~~~
+
+ALTER TABLE phpbb_sessions ADD useragent char(128) NOT NULL default '';
+
+CREATE TABLE phpbb_rate_results (
+  rating_id mediumint(8) unsigned NOT NULL auto_increment,
+  user_id mediumint(8) unsigned NOT NULL default '0',
+  topic_id mediumint(8) unsigned NOT NULL default '0',
+  rating mediumint(8) unsigned NOT NULL default '0',
+  user_ip char(8) NOT NULL default '',
+  rating_time int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (rating_id),
+  KEY topic_id (topic_id)
+) TYPE=MyISAM ;
+
+ALTER TABLE phpbb_forums ADD auth_rate TINYINT(2) NOT NULL default -1;
+
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('index_rating_return','10');
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('min_rates_number','5');
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('rating_max','10');
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('allow_ext_rating','1');
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('large_rating_return_limit','30');
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('check_anon_ip_when_rating','1');
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('allow_rerate','1');
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('header_rating_return_limit','3');
+
+August 3rd 2004
+~~~~~~~~~~~~~~~
+
+ALTER TABLE phpbb_forums ADD auth_ban TINYINT (2) not null DEFAULT "3"
+ALTER TABLE phpbb_forums ADD auth_greencard TINYINT (2) not null DEFAULT "5"
+ALTER TABLE phpbb_forums ADD auth_bluecard TINYINT (2) not null DEFAULT "1"
+ALTER TABLE phpbb_auth_access ADD auth_ban TINYINT (1) not null DEFAULT "0"
+ALTER TABLE phpbb_auth_access ADD auth_greencard TINYINT (1) not null DEFAULT "0"
+ALTER TABLE phpbb_auth_access ADD auth_bluecard TINYINT (1) not null DEFAULT "0"
+INSERT INTO phpbb_config (config_name, config_value) VALUES ("bluecard_limit", "3")
+INSERT INTO phpbb_config (config_name, config_value) VALUES ("bluecard_limit_2", "1")
+INSERT INTO phpbb_config (config_name, config_value) VALUES ("max_user_bancard", "10")
+INSERT INTO phpbb_config (config_name, config_value) VALUES ("report_forum", "0")
+ALTER TABLE phpbb_users ADD user_warnings SMALLINT (5) DEFAULT "0"
+ALTER TABLE phpbb_posts ADD post_bluecard TINYINT (1)
+
+July 26th 2004
+~~~~~~~~~~~~~~
+
+CREATE TABLE phpbb_topics_view(
+	topic_id mediumint(8) NOT NULL,
+	user_id mediumint(8) NOT NULL,
+	view_time int(11) NOT NULL,
+	view_count int(11) NOT NULL,
+  	KEY topic_id (topic_id),
+  	KEY user_id (user_id)
+);
+
+July 19th 2004
+~~~~~~~~~~~~~~
+
+ALTER TABLE phpbb_groups
+DROP subscription_cost,
+DROP p2,
+DROP t2,
+DROP subscription_enabled,
+DROP subscription_period,
+ADD subscription_id MEDIUMINT( 8 ) DEFAULT '0' NOT NULL;
+
+DROP TABLE IF EXISTS phpbb_groups_subscriptions;
+CREATE TABLE phpbb_groups_subscriptions (
+	subscription_id MEDIUMINT( 8 ) NOT NULL AUTO_INCREMENT ,
+	subscription_enabled TINYINT( 1 ) DEFAULT '1' NOT NULL ,
+	subscription_length SMALLINT( 4 ) NOT NULL ,
+	subscription_unit CHAR( 1 ) NOT NULL,
+	subscription_cost DECIMAL( 11, 2 ) NOT NULL ,
+	subscription_currency VARCHAR( 3 ) NOT NULL ,
+	paypal_email VARCHAR( 255 ) NOT NULL ,
+	paypal_bgcolor VARCHAR( 1 ) DEFAULT 'W' NOT NULL ,
+	PRIMARY KEY ( subscription_id ) ,
+	INDEX ( subscription_enabled )
+);
+
+July 6th 2004
+~~~~~~~~~~~~~
+
+CREATE TABLE phpbb_referers (
+    referer_id mediumint(8) UNSIGNED NOT NULL auto_increment,
+    referer_host varchar(255) NOT NULL default '',
+    referer_url varchar(255) NOT NULL default '',
+    referer_ip varchar(8) NOT NULL default '',
+    referer_hits int(10) NOT NULL default '1',
+    referer_firstvisit int(11) DEFAULT '0' NOT NULL,
+    referer_lastvisit int(11) DEFAULT '0' NOT NULL,
+    PRIMARY KEY (referer_id)
+);
+
+July 5th 2004
+~~~~~~~~~~~~~
+
+DROP TABLE IF EXISTS phpbb_rules;
+CREATE TABLE phpbb_rules (
+  rule_id mediumint(8) NOT NULL default '0',
+  rule_text text NOT NULL,
+  rule_date int(11) NOT NULL default '0',
+  in_force tinyint(1) NOT NULL default '1',
+  PRIMARY KEY  ( rule_id )
+);
+
+ALTER TABLE phpbb_users ADD user_retrosig SMALLINT(1) DEFAULT '0' NOT NULL;
+
+July 4th 2004
+~~~~~~~~~~~~~
+
+ALTER TABLE phpbb_users ADD user_type tinyint NOT NULL DEFAULT 0;
+
+INSERT INTO phpbb_config (config_name, config_value) VALUES('ldap_gid', 'memberof');
+INSERT INTO phpbb_config (config_name, config_value) VALUES('ldap_group_sync', '0');
+INSERT INTO phpbb_config (config_name, config_value) VALUES('ldap_email', 'email');
+INSERT INTO phpbb_config (config_name, config_value) VALUES('ldap_web', 'web');
+INSERT INTO phpbb_config (config_name, config_value) VALUES('ldap_location', '');
+INSERT INTO phpbb_config (config_name, config_value) VALUES('ldap_occupation', '');
+INSERT INTO phpbb_config (config_name, config_value) VALUES('ldap_signature', '');
+
+CREATE TABLE phpbb_privmsga (
+  privmsg_id mediumint(8) unsigned NOT NULL auto_increment,
+  privmsg_subject varchar(255) default NULL,
+  privmsg_text text,
+  privmsg_bbcode_uid varchar(10) default NULL,
+  privmsg_time int(11) NOT NULL default '0',
+  privmsg_enable_bbcode tinyint(1) NOT NULL default '0',
+  privmsg_enable_html tinyint(1) NOT NULL default '0',
+  privmsg_enable_smilies tinyint(1) NOT NULL default '0',
+  privmsg_attach_sig tinyint(1) NOT NULL default '0',
+  privmsg_icon tinyint(2) default NULL,
+  PRIMARY KEY  (privmsg_id)
+);
+
+CREATE TABLE phpbb_privmsga_folders (
+  folder_id mediumint(8) unsigned NOT NULL auto_increment,
+  folder_main tinyint(2) NOT NULL default '0',
+  folder_user_id mediumint(8) unsigned NOT NULL default '0',
+  folder_name varchar(255) NOT NULL default '',
+  folder_order mediumint(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (folder_id)
+);
+
+INSERT INTO phpbb_privmsga_folders VALUES (1, 0, 0, 'Inbox', 10);
+INSERT INTO phpbb_privmsga_folders VALUES (2, 0, 0, 'Outbox', 20);
+INSERT INTO phpbb_privmsga_folders VALUES (3, 0, 0, 'Sentbox', 30);
+INSERT INTO phpbb_privmsga_folders VALUES (4, 0, 0, 'Savebox', 40);
+
+CREATE TABLE phpbb_privmsga_recips (
+  privmsg_recip_id mediumint(8) unsigned NOT NULL auto_increment,
+  privmsg_id mediumint(8) unsigned NOT NULL default '0',
+  privmsg_direct tinyint(1) unsigned NOT NULL default '0',
+  privmsg_user_id mediumint(8) unsigned NOT NULL default '0',
+  privmsg_ip varchar(8) default NULL,
+  privmsg_folder_id mediumint(8) unsigned NOT NULL default '0',
+  privmsg_read tinyint(1) unsigned NOT NULL default '0',
+  privmsg_status tinyint(1) unsigned NOT NULL default '0',
+  privmsg_distrib tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (privmsg_recip_id),
+  KEY privmsg_id (privmsg_id)
+);
+
+CREATE TABLE phpbb_privmsga_rules (
+  rules_id mediumint(8) unsigned NOT NULL auto_increment,
+  rules_user_id mediumint(8) NOT NULL default '0',
+  rules_folder_id smallint(8) unsigned NOT NULL default '0',
+  rules_name varchar(255) NOT NULL default '',
+  rules_group_id mediumint(8) NOT NULL default '0',
+  rules_word varchar(255) default NULL,
+  KEY rules_id (rules_id)
+);
+
+ALTER TABLE phpbb_users ADD user_max_inbox_privmsgs SMALLINT(5) DEFAULT '50' NOT NULL;
+ALTER TABLE phpbb_users ADD user_max_sentbox_privmsgs SMALLINT(5) DEFAULT '50' NOT NULL;
+ALTER TABLE phpbb_users ADD user_max_savebox_privmsgs SMALLINT(5) DEFAULT '150' NOT NULL;
+ALTER TABLE phpbb_users ADD user_apm_save_to_mail TINYINT(1) DEFAULT '1' NOT NULL;
+
+July 3rd 2004
+~~~~~~~~~~~~~
+
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('cron_enable', '0');
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('cron_every', '0');
+INSERT INTO phpbb_config (config_name, config_value, is_dynamic) VALUES ('cron_next', '0', 1);
+INSERT INTO phpbb_config (config_name, config_value, is_dynamic) VALUES ('cron_count', '0', 1);
+INSERT INTO phpbb_config (config_name, config_value, is_dynamic) VALUES ('cron_lock', '0', 1);
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('show_begin_for', '');
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('show_not_optimized', '0');
+DROP TABLE phpbb_optimize_db;
+
+ALTER TABLE phpbb_config ADD is_dynamic TINYINT( 1 ) DEFAULT '0' NOT NULL ;
+ALTER TABLE phpbb_config ADD INDEX is_dynamic ( is_dynamic );
+INSERT INTO phpbb_config (config_name, config_value, is_dynamic) VALUES ('cache_last_gc', '0', 1);
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('cache_gc', '7200');
+UPDATE phpbb_config SET is_dynamic = '1' WHERE config_name = 'record_online_date';
+UPDATE phpbb_config SET is_dynamic = '1' WHERE config_name = 'record_online_users';
+
+July 2nd 2004
+~~~~~~~~~~~~~
+
+CREATE TABLE phpbb_acronyms (
+    acronym_id MEDIUMINT NOT NULL AUTO_INCREMENT,
+    acronym VARCHAR( 80 ) NOT NULL ,
+    description VARCHAR( 255 ) NOT NULL ,
+    PRIMARY KEY ( acronym_id )
+);
+
+CREATE TABLE phpbb_smart (
+    smart_id MEDIUMINT NOT NULL AUTO_INCREMENT,
+    smart VARCHAR( 80 ) NOT NULL ,
+    url VARCHAR( 255 ) NOT NULL ,
+    PRIMARY KEY ( smart_id )
+);
+
+CREATE TABLE phpbb_menu_links (
+    bl_id MEDIUMINT( 8 ) NOT NULL auto_increment,
+    bl_img VARCHAR( 150 ) NOT NULL ,
+    bl_name VARCHAR( 50 ) NOT NULL ,
+    bl_parameter VARCHAR( 50 ) NOT NULL ,
+    bl_link VARCHAR( 128 ) NOT NULL ,
+    bl_level TINYINT( 1 ) NOT NULL ,
+    bl_dsort MEDIUMINT( 8 ) NOT NULL ,
+    PRIMARY KEY (bl_id)
+);
+
+CREATE TABLE phpbb_user_menu_links (
+    user_id MEDIUMINT( 8 ) NOT NULL ,
+    board_link MEDIUMINT( 8 ) NOT NULL ,
+    board_sort MEDIUMINT( 8 ) NOT NULL
+);
+
+INSERT INTO phpbb_menu_links VALUES (1, 'icon_mini_home.gif', 'profilcp_index_shortcut', '', 'index', -1, 10);
+INSERT INTO phpbb_menu_links VALUES (2, 'icon_mini_forums.gif', 'Forum', '', 'forum', -1, 20);
+INSERT INTO phpbb_menu_links VALUES (3, 'icon_mini_search.gif', 'Search', '', 'search', -1, 30);
+INSERT INTO phpbb_menu_links VALUES (4, 'icon_mini_profile.gif', 'profilcp_profil_shortcut', 'mode=editprofile', 'profile', 0, 40);
+INSERT INTO phpbb_menu_links VALUES (5, 'icon_minilink.gif', 'Prillian', '', 'javascript:prill_launch(\'imclient.php?mode=4&amp;mode2=1&amp;mode_switch=1\', \'256\', \'448\')', 0, 50);
+INSERT INTO phpbb_menu_links VALUES (6, 'icon_mini_members.gif', 'Forum_Rules', '', 'rules', -1, 60);
+INSERT INTO phpbb_menu_links VALUES (7, 'icon_mini_faq.gif', 'FAQ', '', 'faq', -1, 70);
+INSERT INTO phpbb_menu_links VALUES (8, 'icon_mini_members.gif', 'Memberlist', '', 'memberlist', -1, 80);
+INSERT INTO phpbb_menu_links VALUES (9, 'icon_mini_groups.gif', 'Usergroups', '', 'groupcp', -1, 90);
+INSERT INTO phpbb_menu_links VALUES (10, 'icon_mini_admin.gif', 'profilcp_admin_shortcut', '', 'admin/index', 1, 100);
+
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('bl_seperator', '0');
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('bl_seperator_content', 'SPACE');
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('bl_break', '5');
+
+
+June 30th 2004
+~~~~~~~~~~~~~~
+
+CREATE TABLE phpbb_groups_subscriptions_log (
+  groups_transaction_id int(11) NOT NULL auto_increment,
+  groups_purchase_date varchar(20) NOT NULL default '',
+  groups_paid varchar(20) NOT NULL default '',
+  groups_id_number varchar(20) NOT NULL default '',
+  groups_user_ip varchar(20) NOT NULL default '',
+  groups_phpbb_id varchar(20) NOT NULL default '',
+  groups_phpbb_username varchar(200) NOT NULL default '',
+  groups_gross_amount varchar(200) NOT NULL default '',
+  groups_action varchar(200) NOT NULL default '',
+  PRIMARY KEY  (groups_transaction_id)
+) TYPE=MyISAM AUTO_INCREMENT=3;
+
+CREATE TABLE phpbb_groups_subscriptions (
+  id int(11) NOT NULL auto_increment,
+  paypal_email varchar(200) NOT NULL default 'paypal@yoursite.com',
+  paypal_bg_color varchar(200) NOT NULL default 'W',
+  paypal_currency varchar(200) NOT NULL default 'USD',
+  PRIMARY KEY  (id)
+) TYPE=MyISAM AUTO_INCREMENT=3;
+
+ALTER TABLE phpbb_groups ADD subscription_cost VARCHAR( 20 ) DEFAULT '0.00' NOT NULL;
+ALTER TABLE phpbb_groups ADD p2 VARCHAR( 20 ) DEFAULT '--' NOT NULL;
+ALTER TABLE phpbb_groups ADD t2 VARCHAR( 20 ) DEFAULT '-select one-' NOT NULL;
+ALTER TABLE phpbb_groups ADD subscription_enabled VARCHAR( 20 ) DEFAULT '' NOT NULL;
+ALTER TABLE phpbb_groups ADD subscription_period VARCHAR( 20 ) DEFAULT '' NOT NULL;
+
+INSERT INTO phpbb_groups_subscriptions VALUES (0, 'paypal@yoursite.com', 'W', 'USD');
+
+CREATE TABLE phpbb_block_variable (
+  bvid int(10) NOT NULL auto_increment,
+  label varchar(30) NOT NULL default '',
+  sub_label varchar(255) default NULL,
+  config_name varchar(30) NOT NULL default '',
+  field_options varchar(255) default NULL,
+  field_values varchar(255) default NULL,
+  type tinyint(1) DEFAULT '0' NOT NULL,
+  block varchar(255) default NULL,
+  PRIMARY KEY  (config_name),
+  KEY bvid (bvid)
+);
+
+CREATE TABLE phpbb_blocks (
+  bid int(10) NOT NULL auto_increment,
+  title varchar(60) NOT NULL default '',
+  content text NOT NULL,
+  bposition char(1) NOT NULL default '',
+  weight int(10) NOT NULL default '1',
+  active TINYINT( 1 ) DEFAULT '1' NOT NULL,
+  blockfile varchar(255) NOT NULL default '',
+  view TINYINT( 1 ) DEFAULT '0' NOT NULL,
+  layout int(10) NOT NULL default '1',
+  block_bbcode_uid varchar(10) default NULL,
+  type TINYINT( 1 ) DEFAULT '1' NOT NULL,
+  PRIMARY KEY  (bid)
+);
+
+ALTER TABLE phpbb_blocks ADD border tinyint(1) NOT NULL default '1';
+ALTER TABLE phpbb_blocks ADD titlebar tinyint(1) NOT NULL default '1';
+ALTER TABLE phpbb_blocks ADD background tinyint(1) NOT NULL default '1';
+ALTER TABLE phpbb_blocks ADD local tinyint(1) NOT NULL default '0';
+ALTER TABLE phpbb_blocks ADD groups tinytext NOT NULL;
+
+INSERT INTO phpbb_blocks VALUES (1, 'Navigation', '', 'l', 1, 1, 'blocks_imp_qmenu', 0, 1, '', 0, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (2, 'Statistics', '', 'l', 2, 1, 'blocks_imp_statistics', 0, 1, '', 1, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (3, 'Poll', '', 'l', 3, 1, 'blocks_imp_poll', 0, 1, '', 1, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (4, 'Welcome to Minerva R3', '<table cellspacing="0" cellpadding="0" border="0" width="100%">\r\n<tr>\r\n<td class="row1" align="center"><span class="gen">\r\nWelcome to Minerva R3<br /><br />For questions, comments and suggestions, please visit <a href="http://www.project-minerva.org">Project Minerva</a>\r\n<br />\r\n<br />\r\n</span>\r\n</td>\r\n</tr>\r\n</table>', 't', 1, 1, '', 0, 1, '', 0, 1, 1, 1, 0, '');
+
+INSERT INTO phpbb_blocks VALUES (5, 'Profile', '', 'r', 1, 1, 'blocks_imp_user_block', 0, 1, '', 0, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (6, 'Who Is Online', '', 'r', 2, 1, 'blocks_imp_online_users', 0, 1, 1, 0, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (7, 'Links', '<table width="100%" cellpadding="0" cellspacing="1" border="0">\r\n<tr>\r\n<td class="row1" align="center"><a href="http://www.project-minerva.org" target="_blank" class="gen">Project Minerva</a></td>\r\n</tr>\r\n</table>', 'r', 3, 1, '', 0, 1, '', 0, 1, 1, 1, 0, '');
+
+INSERT INTO phpbb_blocks VALUES (8, 'Navigation', '', 'l', 1, 1, 'blocks_imp_qmenu', 0, 2, '', 0, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (9, 'Profile', '', 'l', 2, 1, 'blocks_imp_user_block', 0, 2, '', 0, 1, 1, 1, 0, '');
+
+INSERT INTO phpbb_blocks VALUES (10, 'Navigation', '', 'l', 1, 1, 'blocks_imp_qmenu', 0, 3, '', 0, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (11, 'Recent Posts', '', 'l', 2, 1, 'blocks_imp_recent_topics', 0, 3, '', 0, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (12, 'Search', '', 'l', 3, 1, 'blocks_imp_search', 0, 3, '', 0, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (13, 'Poll', '', 'l', 4, 1, 'blocks_imp_poll', 0, 3, '', 0, 1, 1, 1, 0, '');
+
+INSERT INTO phpbb_blocks VALUES (14, 'Navigation', '', 'l', 1, 1, 'blocks_imp_qmenu', 0, 4, '', 0, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (15, 'Recent Posts', '', 'l', 2, 1, 'blocks_imp_recent_topics', 0, 4, '', 0, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (16, 'Search', '', 'l', 3, 1, 'blocks_imp_search', 0, 4, '', 0, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (17, 'Poll', '', 'l', 4, 1, 'blocks_imp_poll', 0, 4, '', 0, 1, 1, 1, 0, '');
+
+INSERT INTO phpbb_blocks VALUES (18, 'Navigation', '', 'l', 1, 1, 'blocks_imp_qmenu', 0, 5, '', 0, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (19, 'Recent Posts', '', 'l', 2, 1, 'blocks_imp_recent_topics', 0, 5, '', 0, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (20, 'Search', '', 'l', 3, 1, 'blocks_imp_search', 0, 5, '', 0, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (21, 'Poll', '', 'l', 4, 1, 'blocks_imp_poll', 0, 5, '', 0, 1, 1, 1, 0, '');
+
+INSERT INTO phpbb_blocks VALUES (22, 'Navigation', '', 'l', 1, 1, 'blocks_imp_qmenu', 0, 6, '', 0, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (23, 'Recent Posts', '', 'l', 2, 1, 'blocks_imp_recent_topics', 0, 6, '', 0, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (24, 'Search', '', 'l', 3, 1, 'blocks_imp_search', 0, 6, '', 0, 1, 1, 1, 0, '');
+INSERT INTO phpbb_blocks VALUES (25, 'Poll', '', 'l', 4, 1, 'blocks_imp_poll', 0, 6, '', 0, 1, 1, 1, 0, '');
+
+ALTER TABLE phpbb_block_layout ADD view tinyint(1) NOT NULL default '0';
+ALTER TABLE phpbb_block_layout ADD groups tinytext NOT NULL;
+
+INSERT INTO phpbb_block_layout VALUES (1, 'Default', 0, '');
+INSERT INTO phpbb_block_layout VALUES (2, 'Profile', 0, '');
+INSERT INTO phpbb_block_layout VALUES (3, 'Forum Index', 0, '');
+INSERT INTO phpbb_block_layout VALUES (4, 'View Forum', 0, '');
+INSERT INTO phpbb_block_layout VALUES (5, 'View Topic', 0, '');
+INSERT INTO phpbb_block_layout VALUES (6, 'Post Topic', 0, '');
+
+INSERT INTO phpbb_block_variable VALUES (1, 'Left width', 'Width of forum-wide left column in pixels', 'left_width', '', '', 1, '@Portal Config');
+INSERT INTO phpbb_block_variable VALUES (2, 'Right width', 'Width of forum-wide right column in pixels', 'right_width', '', '', 1, '@Portal Config');
+INSERT INTO phpbb_block_variable VALUES (3, 'Poll Bar Length', 'decrease/increase the value for 1 vote bar length', 'md_poll_bar_length', '', '', 1, 'poll');
+INSERT INTO phpbb_block_variable VALUES (4, 'Poll Forum ID(s)', 'comma delimited', 'md_poll_forum_id', '', '', 1, 'poll');
+INSERT INTO phpbb_block_variable VALUES (5, 'Number of recent topics', 'number of topics displayed', 'md_num_recent_topics', '', '', 1, 'recent_topics');
+INSERT INTO phpbb_block_variable VALUES (6, 'Approve MOD installed?', 'tick if Approve MOD is installed', 'md_approve_mod_installed', '', '', 4, 'recent_topics');
+INSERT INTO phpbb_block_variable VALUES (7, 'Recent Topics Style', 'choose static display or scrolling display', 'md_recent_topics_style', 'Scroll,Static', '1,0', 3, 'recent_topics');
+INSERT INTO phpbb_block_variable VALUES (8, 'Search option text', 'Text displayed as the default option', 'md_search_option_text', '', '', 1, 'search');
+
+INSERT INTO phpbb_block_config VALUES (1, 'default_layout', '1');
+INSERT INTO phpbb_block_config VALUES (2, 'left_width', '150');
+INSERT INTO phpbb_block_config VALUES (3, 'right_width', '150');
+INSERT INTO phpbb_block_config VALUES (4, 'md_poll_bar_length', '40');
+INSERT INTO phpbb_block_config VALUES (5, 'md_poll_forum_id', '1');
+INSERT INTO phpbb_block_config VALUES (6, 'md_num_recent_topics', '10');
+INSERT INTO phpbb_block_config VALUES (7, 'md_approve_mod_installed', '0');
+INSERT INTO phpbb_block_config VALUES (8, 'md_recent_topics_style', '0');
+INSERT INTO phpbb_block_config VALUES (9, 'md_search_option_text', 'Forum');
+
+May 8th 2004
+~~~~~~~~~~~~
+
+ALTER TABLE phpbb_users ADD COLUMN user_custom_title varchar(255) NULL;
+ALTER TABLE phpbb_users ADD COLUMN user_custom_title_status tinyint(1) default '0' not null;
+
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('custom_title_days', 0);
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('custom_title_posts', 0);
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('custom_title_mode', 0);
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('custom_title_maxlength', 45);
+
+Before May 7th 2004
+~~~~~~~~~~~~~~~~~~~
+
+CREATE TABLE phpbb_modules (
+  module_id mediumint(8) unsigned NOT NULL auto_increment,
+  module_name varchar(64) NOT NULL default '',
+  module_type int(6) NOT NULL default '0',
+  module_displayname varchar(64) NOT NULL default '',
+  module_description varchar(255) NOT NULL default '',
+  module_version varchar(10) NOT NULL default '',
+  module_files text,
+  module_templates text,
+  module_admin text,
+  module_blocks text,
+  module_language text,
+  module_constants text,
+  module_headers text,
+  module_state tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (module_id)
+);
+
+ALTER TABLE phpbb_categories ADD cat_main_type CHAR(1);
+ALTER TABLE phpbb_categories ADD cat_main MEDIUMINT(8) UNSIGNED DEFAULT '0' NOT NULL;
+ALTER TABLE phpbb_categories ADD cat_desc TEXT NOT NULL;
+ALTER TABLE phpbb_categories ADD icon VARCHAR(255);
+
+ALTER TABLE phpbb_forums ADD forum_link VARCHAR(255);
+ALTER TABLE phpbb_forums ADD forum_link_internal TINYINT(1) NOT NULL;
+ALTER TABLE phpbb_forums ADD forum_link_hit_count TINYINT(1) NOT NULL;
+ALTER TABLE phpbb_forums ADD forum_link_hit BIGINT(20) UNSIGNED NOT NULL;
+ALTER TABLE phpbb_forums ADD icon VARCHAR(255);
+ALTER TABLE phpbb_forums ADD main_type CHAR(1);
+ALTER TABLE phpbb_forums ADD auth_global_announce TINYINT(2) NOT NULL AFTER auth_announce;
+ALTER TABLE phpbb_forums ADD forum_display_sort TINYINT(1) NOT NULL;
+ALTER TABLE phpbb_forums ADD forum_display_order TINYINT(1) NOT NULL;
+UPDATE phpbb_forums SET auth_global_announce=5;
+
+ALTER TABLE phpbb_users ADD user_sub_forum TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_split_cat TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_last_topic_title TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_sub_level_links TINYINT(1) DEFAULT '2' NOT NULL;
+ALTER TABLE phpbb_users ADD user_display_viewonline TINYINT(1) DEFAULT '2' NOT NULL;
+ALTER TABLE phpbb_users ADD user_split_global_announce TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_split_announce TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_split_sticky TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_split_topic_split TINYINT(1) DEFAULT '0' NOT NULL;
+ALTER TABLE phpbb_users ADD user_announcement_date_display TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_announcement_display TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_announcement_display_forum TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_announcement_split TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_announcement_forum TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_unread_topics TEXT;
+ALTER TABLE phpbb_users ADD user_realname VARCHAR(25) NOT NULL;
+ALTER TABLE phpbb_users ADD user_gender TINYINT(1) UNSIGNED DEFAULT '0' NOT NULL;
+ALTER TABLE phpbb_users ADD user_birthday VARCHAR(8) DEFAULT '0' NOT NULL;
+ALTER TABLE phpbb_users ADD user_last_birthday INT(11) UNSIGNED DEFAULT '0' NOT NULL;
+ALTER TABLE phpbb_users ADD user_home_phone VARCHAR(20);
+ALTER TABLE phpbb_users ADD user_home_fax VARCHAR(20);
+ALTER TABLE phpbb_users ADD user_work_phone VARCHAR(20);
+ALTER TABLE phpbb_users ADD user_work_fax VARCHAR(20);
+ALTER TABLE phpbb_users ADD user_cellular VARCHAR(20);
+ALTER TABLE phpbb_users ADD user_pager VARCHAR(20);
+ALTER TABLE phpbb_users ADD user_summer_time TINYINT(1) UNSIGNED DEFAULT '0' NOT NULL;
+ALTER TABLE phpbb_users ADD user_list_option VARCHAR(255);
+ALTER TABLE phpbb_users ADD user_allow_email TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_allow_website TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_allow_messanger TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_allow_real TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_allow_sig TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_viewpm TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_viewwebsite TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_viewmessanger TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_viewreal TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_viewavatar TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_viewsig TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_viewimg TINYINT(1) DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_buddy_friend_display TINYINT(1) DEFAULT '1';
+ALTER TABLE phpbb_users ADD user_buddy_ignore_display TINYINT(1) DEFAULT '1';
+ALTER TABLE phpbb_users ADD user_buddy_friend_of_display TINYINT(1) DEFAULT '1';
+ALTER TABLE phpbb_users ADD user_buddy_ignored_by_display TINYINT(1) DEFAULT '1';
+ALTER TABLE phpbb_users ADD user_watched_topics_per_page SMALLINT(3) DEFAULT '15';
+ALTER TABLE phpbb_users ADD user_instmsgs_per_page SMALLINT(3) DEFAULT '5';
+ALTER TABLE phpbb_users ADD user_holidays TINYINT(1) UNSIGNED DEFAULT '2' NOT NULL;
+ALTER TABLE phpbb_users ADD user_flag varchar(25) NULL;
+ALTER TABLE phpbb_users ADD user_inactive_emls TINYINT( 1 ) NOT NULL ;
+ALTER TABLE phpbb_users ADD user_inactive_last_eml INT( 11 ) NOT NULL ;
+ALTER TABLE phpbb_users ADD user_rules INT( 11 ) NOT NULL ;
+ALTER TABLE phpbb_users ADD user_cash decimal(11,2) NOT NULL default '0.00';
+
+ALTER TABLE phpbb_topics ADD topic_announce_duration MEDIUMINT(5) NOT NULL;
+ALTER TABLE phpbb_topics ADD topic_icon TINYINT(2);
+
+ALTER TABLE phpbb_auth_access ADD auth_global_announce TINYINT(1) NOT NULL AFTER auth_announce;
+
+ALTER TABLE phpbb_posts ADD post_icon TINYINT(2);
+ALTER TABLE phpbb_posts ADD INDEX (post_icon);
+
+ALTER TABLE phpbb_user_group ADD group_moderator TINYINT(1) NOT NULL;
+
+ALTER TABLE phpbb_groups ADD group_ldap_update smallint NULL;
+ALTER TABLE phpbb_groups ADD group_count INT (4) UNSIGNED DEFAULT "99999999";
+ALTER TABLE phpbb_groups ADD group_count_max INT (4) UNSIGNED DEFAULT "99999999";
+ALTER TABLE phpbb_groups ADD group_count_enable SMALLINT (2) UNSIGNED DEFAULT "0";
+
+ALTER TABLE phpbb_sessions ADD session_robot VARCHAR(32);
+
+ALTER TABLE phpbb_ranks CHANGE rank_title rank_title VARCHAR(255) NOT NULL;
+ALTER TABLE phpbb_ranks ADD rank_max MEDIUMINT(8) NOT NULL AFTER rank_min;
+
+CREATE TABLE phpbb_flags (
+   flag_id int(10) NOT NULL auto_increment,
+   flag_name varchar(25),
+   flag_image varchar(25),
+   PRIMARY KEY (flag_id)
+);
+
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','afghanistan','afghanistan.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','albania','albania.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','algeria','algeria.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','andorra','andorra.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','angola','angola.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','antigua and barbuda','antiguabarbuda.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','argentina','argentina.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','armenia','armenia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','australia','australia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','austria','austria.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','azerbaijan','azerbaijan.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','bahamas','bahamas.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','bahrain','bahrain.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','bangladesh','bangladesh.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','barbados','barbados.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','belarus','belarus.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','belgium','belgium.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','belize','belize.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','benin','benin.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','bhutan','bhutan.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','bolivia','bolivia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','bosnia herzegovina','bosnia_herzegovina.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','botswana','botswana.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','brazil','brazil.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','brunei','brunei.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','bulgaria','bulgaria.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','burkinafaso','burkinafaso.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','burma','burma.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','burundi','burundi.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','cambodia','cambodia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','cameroon','cameroon.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','canada','canada.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','central african rep','centralafricanrep.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','chad','chad.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','chile','chile.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','china','china.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','columbia','columbia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','comoros','comoros.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','congo','congo.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','costarica','costarica.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','croatia','croatia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','cuba','cuba.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','cyprus','cyprus.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','czech republic','czechrepublic.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','demrepcongo','demrepcongo.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','denmark','denmark.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','djibouti','djibouti.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','dominica','dominica.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','dominican rep','dominicanrep.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','ecuador','ecuador.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','egypt','egypt.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','elsalvador','elsalvador.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','england','england.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','eq guinea','eq_guinea.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','eritrea','eritrea.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','estonia','estonia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','ethiopia','ethiopia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','europe','europe.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','fiji','fiji.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','finland','finland.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','france','france.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','gabon','gabon.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','gambia','gambia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','georgia','georgia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','germany','germany.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','ghana','ghana.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','greece','greece.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','grenada','grenada.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','grenadines','grenadines.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','guatemala','guatemala.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','guinea','guinea.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','guineabissau','guineabissau.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','guyana','guyana.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','haiti','haiti.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','honduras','honduras.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','hong kong','hong_kong.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','hungary','hungary.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','iceland','iceland.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','india','india.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','indonesia','indonesia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','iran','iran.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','iraq','iraq.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','ireland','ireland.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','israel','israel.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','italy','italy.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','ivory coast','ivorycoast.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','jamaica','jamaica.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','japan','japan.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','jordan','jordan.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','kazakhstan','kazakhstan.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','kenya','kenya.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','kiribati','kiribati.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','kuwait','kuwait.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','kyrgyzstan','kyrgyzstan.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','laos','laos.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','latvia','latvia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','lebanon','lebanon.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','liberia','liberia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','libya','libya.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','liechtenstein','liechtenstein.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','lithuania','lithuania.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','luxembourg','luxembourg.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','macadonia','macadonia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','macau','macau.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','madagascar','madagascar.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','malawi','malawi.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','malaysia','malaysia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','maldives','maldives.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','mali','mali.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','malta','malta.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','mauritania','mauritania.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','mauritius','mauritius.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','mexico','mexico.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','micronesia','micronesia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','moldova','moldova.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','monaco','monaco.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','mongolia','mongolia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','morocco','morocco.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','mozambique','mozambique.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','namibia','namibia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','nauru','nauru.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','nepal','nepal.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','neth antilles','neth_antilles.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','netherlands','netherlands.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','new zealand','newzealand.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','nicaragua','nicaragua.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','niger','niger.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','nigeria','nigeria.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','north korea','north_korea.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','norway','norway.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','oman','oman.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','pakistan','pakistan.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','palestine','palestine.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','panama','panama.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','papua newguinea','papuanewguinea.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','paraguay','paraguay.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','peru','peru.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','philippines','philippines.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','poland','poland.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','portugal','portugal.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','puertorico','puertorico.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','qatar','qatar.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','quebec','quebec.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','rawanda','rawanda.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','romania','romania.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','russia','russia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','sao tome','sao_tome.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','saudiarabia','saudiarabia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','scotland','scotland.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','senegal','senegal.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','serbia','serbia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','seychelles','seychelles.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','sierraleone','sierraleone.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','singapore','singapore.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','slovakia','slovakia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','slovenia','slovenia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','solomon islands','solomon_islands.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','somalia','somalia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','south_korea','south_korea.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','south africa','southafrica.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','spain','spain.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','srilanka','srilanka.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','stkitts nevis','stkitts_nevis.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','stlucia','stlucia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','sudan','sudan.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','suriname','suriname.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','sweden','sweden.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','switzerland','switzerland.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','syria','syria.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','taiwan','taiwan.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','tajikistan','tajikistan.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','tanzania','tanzania.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','thailand','thailand.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','togo','togo.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','tonga','tonga.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','trinidad and tobago','trinidadandtobago.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','tunisia','tunisia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','turkey','turkey.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','turkmenistan','turkmenistan.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','tuvala','tuvala.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','uae','uae.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','uganda','uganda.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','uk','uk.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','ukraine','ukraine.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','uruguay','uruguay.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','usa','usa.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','ussr','ussr.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','uzbekistan','uzbekistan.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','vanuatu','vanuatu.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','venezuela','venezuela.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','vietnam','vietnam.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','wales','wales.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','western samoa','western_samoa.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','yemen','yemen.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','yugoslavia','yugoslavia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','zaire','zaire.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','zambia','zambia.gif');
+INSERT INTO phpbb_flags (flag_id, flag_name, flag_image) VALUES ('','zimbabwe','zimbabwe.gif');
+
+CREATE TABLE phpbb_jr_admin_users (
+  user_id mediumint(9) NOT NULL default '0',
+  user_jr_admin longtext NOT NULL,
+  start_date int(10) unsigned NOT NULL default '0',
+  update_date int(10) unsigned NOT NULL default '0',
+  admin_notes text NOT NULL,
+  notes_view tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (user_id)
+);
+
+
+CREATE TABLE phpbb_buddy (
+  user_id mediumint(8) NOT NULL default '0',
+  buddy_id mediumint(8) NOT NULL default '0',
+  buddy_ignore tinyint(1) NOT NULL default '0',
+  buddy_visible tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (user_id, buddy_id)
+);
+
+CREATE TABLE phpbb_optimize_db (
+  cron_enable enum('0','1') NOT NULL default '0',
+  cron_every int(7) NOT NULL default '86400',
+  cron_next int(11) NOT NULL default '0',
+  cron_count int(5) NOT NULL default '0',
+  cron_lock enum('0','1') NOT NULL default '0',
+  show_begin_for varchar(150) NOT NULL default '',
+  show_not_optimized enum('0','1') NOT NULL default '0'
+);
+
+INSERT INTO phpbb_optimize_db VALUES ('0', 86400, 0, 0, '1', '', '0');
+
+CREATE TABLE phpbb_topics_action_log (
+  log_id mediumint(8) unsigned NOT NULL auto_increment,
+  user_id mediumint(9) NOT NULL default '0',
+  topic_id mediumint(8) unsigned NOT NULL default '0',
+  topic_title varchar(255) NOT NULL default '',
+  topic_text varchar(255) NOT NULL default '',
+  log_time int(10) unsigned NOT NULL default '0',
+  log_action tinyint(4) NOT NULL default '0',
+  PRIMARY KEY  (log_id),
+  KEY user_id (user_id),
+  KEY log_time (log_time),
+  KEY log_action (log_action)
+);
+
+CREATE TABLE phpbb_rules (
+  date int(11) NOT NULL default '0',
+  rules text NOT NULL,
+  pm_subject varchar(255) NOT NULL default '',
+  pm_message text
+);
+
+INSERT INTO phpbb_rules (date,rules,pm_subject,pm_message) VALUES (0,'','Attention the site Rules have been changed.','The Rules on this site have been changed, so we invite you to read them again\r\n  \r\nThe Administrator') ;
+
+CREATE TABLE phpbb_cash (
+  cash_id smallint(6) NOT NULL auto_increment,
+  cash_order smallint(6) NOT NULL default '0',
+  cash_settings smallint(4) NOT NULL default '3313',
+  cash_dbfield varchar(64) NOT NULL default '',
+  cash_name varchar(64) NOT NULL default 'GP',
+  cash_default int(11) NOT NULL default '0',
+  cash_decimals tinyint(2) NOT NULL default '0',
+  cash_imageurl varchar(255) NOT NULL default '',
+  cash_exchange int(11) NOT NULL default '1',
+  cash_perpost int(11) NOT NULL default '25',
+  cash_postbonus int(11) NOT NULL default '2',
+  cash_perreply int(11) NOT NULL default '25',
+  cash_maxearn int(11) NOT NULL default '75',
+  cash_perpm int(11) NOT NULL default '0',
+  cash_perchar int(11) NOT NULL default '20',
+  cash_allowance tinyint(1) NOT NULL default '0',
+  cash_allowanceamount int(11) NOT NULL default '0',
+  cash_allowancetime tinyint(2) NOT NULL default '2',
+  cash_allowancenext int(11) NOT NULL default '0',
+  cash_forumlist varchar(255) NOT NULL default '',
+  PRIMARY KEY  (cash_id)
+);
+
+INSERT INTO phpbb_cash VALUES (1, 1, 3313, 'user_cash', 'Credit', 0, 2, '', 1, 2500, 200, 2500, 7500, 0, 2000, 0, 0, 2, 0, '');
+
+CREATE TABLE phpbb_cash_events (
+  event_name varchar(32) NOT NULL default '',
+  event_data varchar(255) NOT NULL default '',
+  PRIMARY KEY  (event_name)
+);
+
+CREATE TABLE phpbb_cash_exchange (
+  ex_cash_id1 int(11) NOT NULL default '0',
+  ex_cash_id2 int(11) NOT NULL default '0',
+  ex_cash_enabled int(1) NOT NULL default '0',
+  PRIMARY KEY  (ex_cash_id1,ex_cash_id2)
+);
+
+CREATE TABLE phpbb_cash_groups (
+  group_id mediumint(6) NOT NULL default '0',
+  group_type tinyint(2) NOT NULL default '0',
+  cash_id smallint(6) NOT NULL default '0',
+  cash_perpost int(11) NOT NULL default '0',
+  cash_postbonus int(11) NOT NULL default '0',
+  cash_perreply int(11) NOT NULL default '0',
+  cash_perchar int(11) NOT NULL default '0',
+  cash_maxearn int(11) NOT NULL default '0',
+  cash_perpm int(11) NOT NULL default '0',
+  cash_allowance tinyint(1) NOT NULL default '0',
+  cash_allowanceamount int(11) NOT NULL default '0',
+  cash_allowancetime tinyint(2) NOT NULL default '2',
+  cash_allowancenext int(11) NOT NULL default '0',
+  PRIMARY KEY  (group_id,group_type,cash_id)
+);
+
+CREATE TABLE phpbb_cash_log (
+  log_id int(11) NOT NULL auto_increment,
+  log_time int(11) NOT NULL default '0',
+  log_type smallint(6) NOT NULL default '0',
+  log_action varchar(255) NOT NULL default '',
+  log_text varchar(255) NOT NULL default '',
+  PRIMARY KEY  (log_id)
+);
+
+CREATE TABLE phpbb_block_config (
+  id int(10) unsigned NOT NULL auto_increment,
+  config_name varchar(255) NOT NULL default '',
+  config_value varchar(255) NOT NULL default '',
+  PRIMARY KEY  (id)
+);
+
+CREATE TABLE phpbb_block_layout (
+  lid int(10) unsigned NOT NULL auto_increment,
+  name varchar(100) NOT NULL default '',
+  PRIMARY KEY  (lid)
+);
+
+CREATE TABLE phpbb_block_position (
+  bpid int(10) NOT NULL auto_increment,
+  pkey varchar(30) NOT NULL default '',
+  bposition char(1) NOT NULL default '',
+  layout int(10) NOT NULL default '1',
+  PRIMARY KEY  (bpid)
+);
+
+CREATE TABLE phpbb_block_variable (
+  bvid int(10) NOT NULL auto_increment,
+  label varchar(30) NOT NULL default '',
+  sub_label varchar(255) default NULL,
+  config_name varchar(30) NOT NULL default '',
+  field_options varchar(255) default NULL,
+  field_values varchar(255) default NULL,
+  type char(1) NOT NULL default '',
+  block varchar(255) default NULL,
+  PRIMARY KEY  (config_name),
+  KEY bvid (bvid)
+);
+
+CREATE TABLE phpbb_blocks (
+  bid int(10) NOT NULL auto_increment,
+  title varchar(60) NOT NULL default '',
+  content text NOT NULL,
+  bposition char(1) NOT NULL default '',
+  weight int(10) NOT NULL default '1',
+  active int(1) NOT NULL default '1',
+  blockfile varchar(255) NOT NULL default '',
+  view int(1) NOT NULL default '0',
+  layout int(10) NOT NULL default '1',
+  cache int(1) NOT NULL default '0',
+  cache_time int(10) NOT NULL default '0',
+  block_bbcode_uid varchar(10) default NULL,
+  type int(1) NOT NULL default '1',
+  PRIMARY KEY  (bid)
+);
+
+INSERT INTO phpbb_block_config VALUES (1, 'default_layout', '1');
+INSERT INTO phpbb_block_config VALUES (2, 'cache_enabled', '1');
+INSERT INTO phpbb_block_config VALUES (3, 'md_search_option_text', 'Forums');
+INSERT INTO phpbb_block_config VALUES (4, 'md_num_recent_topics', '10');
+INSERT INTO phpbb_block_config VALUES (5, 'md_approve_mod_installed', '0');
+INSERT INTO phpbb_block_config VALUES (6, 'md_recent_topics_style', '0');
+INSERT INTO phpbb_block_config VALUES (7, 'md_poll_bar_length', '65');
+INSERT INTO phpbb_block_config VALUES (8, 'md_poll_forum_id', '1');
+INSERT INTO phpbb_block_config VALUES (9, 'left_width', '150');
+INSERT INTO phpbb_block_config VALUES (10, 'right_width', '150');
+INSERT INTO phpbb_block_config VALUES (11, 'md_cache_file_locking', '1');
+INSERT INTO phpbb_block_config VALUES (12, 'md_cache_write_control', '1');
+INSERT INTO phpbb_block_config VALUES (13, 'md_cache_read_control', '1');
+INSERT INTO phpbb_block_config VALUES (14, 'md_cache_read_type', 'md5');
+INSERT INTO phpbb_block_config VALUES (15, 'md_cache_filename_protect', '0');
+INSERT INTO phpbb_block_config VALUES (16, 'md_cache_serialize', '1');
+
+INSERT INTO phpbb_block_layout VALUES (1, 'Default');
+INSERT INTO phpbb_block_layout VALUES (2, 'Profile');
+INSERT INTO phpbb_block_layout VALUES (3, 'Forum Index');
+INSERT INTO phpbb_block_layout VALUES (4, 'View Forum');
+INSERT INTO phpbb_block_layout VALUES (5, 'View Topic');
+INSERT INTO phpbb_block_layout VALUES (6, 'Post Topic');
+
+INSERT INTO phpbb_block_position VALUES (1, 'top', 't', 0);
+INSERT INTO phpbb_block_position VALUES (2, 'left', 'l', 0);
+INSERT INTO phpbb_block_position VALUES (3, 'right', 'r', 0);
+INSERT INTO phpbb_block_position VALUES (4, 'bottom', 'b', 0);
+
+INSERT INTO phpbb_blocks VALUES (1, 'Navigation', '', 'l', 1, 1, 'blocks_imp_qmenu', 0, 1, 0, 0, '', 0);
+INSERT INTO phpbb_blocks VALUES (2, 'Statistics', '', 'l', 2, 1, 'blocks_imp_statistics', 0, 1, 1, 21600, '', 1);
+INSERT INTO phpbb_blocks VALUES (3, 'Poll', '', 'l', 3, 1, 'blocks_imp_poll', 0, 1, 1, 600, '', 1);
+INSERT INTO phpbb_blocks VALUES (4, 'Welcome to Minerva R3', '<table cellspacing="0" cellpadding="0" border="0" width="100%">\r\n<tr>\r\n<td class="row1" align="center"><span class="gen">\r\nWelcome to Minerva R3<br /><br />For questions, comments and suggestions, please visit <a href="http://www.project-minerva.org">Project Minerva</a>\r\n<br />\r\n<br />\r\n</span>\r\n</td>\r\n</tr>\r\n</table>', 't', 1, 1, '', 0, 1, 1, 600, '', 0);
+INSERT INTO phpbb_blocks VALUES (5, 'Profile', '', 'r', 1, 1, 'blocks_imp_user_block', 0, 1, 0, 0, '', 0);
+INSERT INTO phpbb_blocks VALUES (6, 'Who Is Online', '', 'r', 2, 1, 'blocks_imp_online_users', 0, 1, 1, 600, '', 0);
+INSERT INTO phpbb_blocks VALUES (7, 'Links', '<table width="100%" cellpadding="0" cellspacing="1" border="0">\r\n<tr>\r\n<td class="row1" align="center"><a href="http://www.project-minerva.org" target="_blank" class="gen">Project Minerva</a></td>\r\n</tr>\r\n</table>', 'r', 3, 1, '', 0, 1, 1, 600, '', 0);
+
+INSERT INTO phpbb_blocks VALUES (8, 'Navigation', '', 'l', 1, 1, 'blocks_imp_qmenu', 0, 2, 0, 0, '', 0);
+INSERT INTO phpbb_blocks VALUES (9, 'Profile', '', 'l', 2, 1, 'blocks_imp_user_block', 0, 2, 0, 0, '', 0);
+
+INSERT INTO phpbb_blocks VALUES (10, 'Navigation', '', 'l', 1, 1, 'blocks_imp_qmenu', 0, 3, 0, 0, '', 0);
+INSERT INTO phpbb_blocks VALUES (11, 'Recent Posts', '', 'l', 2, 1, 'blocks_imp_recent_topics', 0, 3, 1, 300, '', 0);
+INSERT INTO phpbb_blocks VALUES (12, 'Search', '', 'l', 3, 1, 'blocks_imp_search', 0, 3, 1, 86400, '', 0);
+INSERT INTO phpbb_blocks VALUES (13, 'Poll', '', 'l', 4, 1, 'blocks_imp_poll', 0, 3, 1, 600, '', 0);
+
+INSERT INTO phpbb_blocks VALUES (14, 'Navigation', '', 'l', 1, 1, 'blocks_imp_qmenu', 0, 4, 0, 0, '', 0);
+INSERT INTO phpbb_blocks VALUES (15, 'Recent Posts', '', 'l', 2, 1, 'blocks_imp_recent_topics', 0, 4, 1, 300, '', 0);
+INSERT INTO phpbb_blocks VALUES (16, 'Search', '', 'l', 3, 1, 'blocks_imp_search', 0, 4, 1, 86400, '', 0);
+INSERT INTO phpbb_blocks VALUES (17, 'Poll', '', 'l', 4, 1, 'blocks_imp_poll', 0, 4, 1, 600, '', 0);
+
+INSERT INTO phpbb_blocks VALUES (18, 'Navigation', '', 'l', 1, 1, 'blocks_imp_qmenu', 0, 5, 0, 0, '', 0);
+INSERT INTO phpbb_blocks VALUES (19, 'Recent Posts', '', 'l', 2, 1, 'blocks_imp_recent_topics', 0, 5, 1, 300, '', 0);
+INSERT INTO phpbb_blocks VALUES (20, 'Search', '', 'l', 3, 1, 'blocks_imp_search', 0, 5, 1, 86400, '', 0);
+INSERT INTO phpbb_blocks VALUES (21, 'Poll', '', 'l', 4, 1, 'blocks_imp_poll', 0, 5, 1, 600, '', 0);
+
+INSERT INTO phpbb_blocks VALUES (22, 'Navigation', '', 'l', 1, 1, 'blocks_imp_qmenu', 0, 6, 0, 0, '', 0);
+INSERT INTO phpbb_blocks VALUES (23, 'Recent Posts', '', 'l', 2, 1, 'blocks_imp_recent_topics', 0, 6, 1, 300, '', 0);
+INSERT INTO phpbb_blocks VALUES (24, 'Search', '', 'l', 3, 1, 'blocks_imp_search', 0, 6, 1, 86400, '', 0);
+INSERT INTO phpbb_blocks VALUES (25, 'Poll', '', 'l', 4, 1, 'blocks_imp_poll', 0, 6, 1, 600, '', 0);
+
+INSERT INTO phpbb_config ( config_name, config_value) VALUES ('topic_action_log_admin', '1');
+INSERT INTO phpbb_config ( config_name, config_value) VALUES ('meta_keywords', 'minerva, portal, phpbb, blocks, modules' );
+INSERT INTO phpbb_config ( config_name, config_value) VALUES ('meta_description', 'Minerva is a modular portal based on phpBB 2.0.x' );
+INSERT INTO phpbb_config ( config_name, config_value) VALUES ('meta_revisit', '14' );
+INSERT INTO phpbb_config ( config_name, config_value) VALUES ('meta_author', 'Minerva' );
+INSERT INTO phpbb_config ( config_name, config_value) VALUES ('meta_owner', 'Minerva' );
+INSERT INTO phpbb_config ( config_name, config_value) VALUES ('meta_distribution', 'global' );
+INSERT INTO phpbb_config ( config_name, config_value) VALUES ('meta_robots', 'index,follow' );
+INSERT INTO phpbb_config ( config_name, config_value) VALUES ('meta_abstract', 'Modular Portal' );
+
+INSERT INTO phpbb_config ( config_name, config_value) VALUES('auth_mode', 'phpbb');
+INSERT INTO phpbb_config ( config_name, config_value) VALUES('ldap_host', '');
+INSERT INTO phpbb_config ( config_name, config_value) VALUES('ldap_port', '389');
+INSERT INTO phpbb_config ( config_name, config_value) VALUES('ldap_host2', '');
+INSERT INTO phpbb_config ( config_name, config_value) VALUES('ldap_port2', '389');
+INSERT INTO phpbb_config ( config_name, config_value) VALUES('ldap_dn', '');
+INSERT INTO phpbb_config ( config_name, config_value) VALUES('ldap_proxy_dn', '');
+INSERT INTO phpbb_config ( config_name, config_value) VALUES('ldap_proxy_dn_pass', '');
+INSERT INTO phpbb_config ( config_name, config_value) VALUES('ldap_start_tls', '0');
+INSERT INTO phpbb_config ( config_name, config_value) VALUES('ldap_uid', 'uid');
+INSERT INTO phpbb_config ( config_name, config_value) VALUES('disable_guest', '0');
+
+INSERT INTO phpbb_config ( config_name, config_value) VALUES ('disable_reg', '0');
+INSERT INTO phpbb_config ( config_name, config_value) VALUES ('disable_reg_msg', 'Registration has been disabled');
+
+INSERT INTO phpbb_config (config_name, config_value) VALUES('cash_disable',0);
+INSERT INTO phpbb_config (config_name, config_value) VALUES('cash_display_after_posts',1);
+INSERT INTO phpbb_config (config_name, config_value) VALUES('cash_post_message','You earned %s for that post');
+INSERT INTO phpbb_config (config_name, config_value) VALUES('cash_disable_spam_num',10);
+INSERT INTO phpbb_config (config_name, config_value) VALUES('cash_disable_spam_time',24);
+INSERT INTO phpbb_config (config_name, config_value) VALUES('cash_disable_spam_message','You have exceeded the alloted amount of posts and will not earn anything for your post');
+INSERT INTO phpbb_config (config_name, config_value) VALUES('cash_installed','yes');
+INSERT INTO phpbb_config (config_name, config_value) VALUES('cash_version','2.2.1');
+INSERT INTO phpbb_config (config_name, config_value) VALUES('cash_adminbig','0');
+INSERT INTO phpbb_config (config_name, config_value) VALUES('cash_adminnavbar','1');
+INSERT INTO phpbb_config (config_name, config_value) VALUES('points_name','Points');
+INSERT INTO phpbb_config (config_name, config_value) VALUES('board_disable_adminview', '1');
+INSERT INTO phpbb_config (config_name, config_value) VALUES('board_disable_msg', 'This site is currently offline for maintainence.');
+
+#
+# Alterations to pre-existing tables for Prillian Messenger
+#
+
+# -- PRIV_MSGS
+ALTER TABLE phpbb_instmsgs ADD instmsgs_from_username varchar(25) DEFAULT '' NOT NULL;
+ALTER TABLE phpbb_instmsgs ADD instmsgs_to_username varchar(25) DEFAULT '' NOT NULL;
+ALTER TABLE phpbb_instmsgs ADD site_id mediumint(8) DEFAULT '0' NOT NULL;
+ALTER TABLE phpbb_instmsgs ADD INDEX site_id (site_id);
+
+# --------------------------------------------------------
+#
+# Table structure for table `phpbb_im_prefs`
+#
+# You might want to change the default values for some of the columns in this
+# table if you want to restrict the default settings for users.  Any column with
+# "tinyint(1)" can have default values of 1 (on/true) or 0 (off/false).  The
+# exceptions to this are:
+# show_controls : 0 = no controls, 1 = images only, 2 = links only, 3 = both
+# list_all_online : 1 = all online users, 2 = buddies on forums, 3 = buddies on IM,
+#     4 = all users on im
+# refresh_method : 0 = Meta, 1 = Javascript, 2 = Both
+# network_user_list : 0 = Don't list Off-Site Users, 1 = List with On-Sites,
+#     2 = List separately
+# default_mode : 0 = Last mode used, 1 = Main Mode
+# current_mode : 1 = Main Mode
+
+CREATE TABLE phpbb_im_prefs (
+  user_id mediumint(8) NOT NULL default '0',
+  user_allow_ims tinyint(1) NOT NULL default '1',
+  user_allow_shout tinyint(1) NOT NULL default '1',
+  user_allow_chat tinyint(1) NOT NULL default '1',
+  user_allow_network tinyint(1) NOT NULL default '1',
+  admin_allow_ims tinyint(1) NOT NULL default '1',
+  admin_allow_shout tinyint(1) NOT NULL default '1',
+  admin_allow_chat tinyint(1) NOT NULL default '1',
+  admin_allow_network tinyint(1) NOT NULL default '1',
+  new_ims smallint(5) unsigned NOT NULL default '0',
+  unread_ims smallint(5) unsigned NOT NULL default '0',
+  read_ims smallint(5) unsigned NOT NULL default '0',
+  total_sent mediumint(8) unsigned NOT NULL default '0',
+  attach_sig tinyint(1) NOT NULL default '0',
+  refresh_rate smallint(5) unsigned NOT NULL default '60',
+  success_close tinyint(1) NOT NULL default '1',
+  refresh_method tinyint(1) NOT NULL default '2',
+  auto_launch tinyint(1) NOT NULL default '1',
+  popup_ims tinyint(1) NOT NULL default '1',
+  list_ims tinyint(1) NOT NULL default '0',
+  show_controls tinyint(1) NOT NULL default '1',
+  list_all_online tinyint(1) NOT NULL default '1',
+  default_mode tinyint(1) NOT NULL default '1',
+  current_mode tinyint(1) NOT NULL default '1',
+  mode1_height varchar(4) NOT NULL default '400',
+  mode1_width varchar(4) NOT NULL default '225',
+  prefs_width varchar(4) NOT NULL default '500',
+  prefs_height varchar(4) NOT NULL default '350',
+  read_height varchar(4) NOT NULL default '300',
+  read_width varchar(4) NOT NULL default '400',
+  send_height varchar(4) NOT NULL default '365',
+  send_width varchar(4) NOT NULL default '460',
+  play_sound tinyint(1) NOT NULL default '1',
+  default_sound tinyint(1) NOT NULL default '1',
+  sound_name varchar(255) default NULL,
+  themes_id mediumint(8) unsigned NOT NULL default '1',
+  network_user_list tinyint(1) NOT NULL default '1',
+  auto_delete tinyint(1) NOT NULL default '0',
+  use_frames tinyint(1) NOT NULL default '1',
+  user_override tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (user_id)
+) TYPE=MyISAM;
+
+# --------------------------------------------------------
+#
+# Table structure for table 'phpbb_im_sites'
+#
+CREATE TABLE phpbb_im_sites (
+  site_id mediumint(8) NOT NULL auto_increment,
+  site_name varchar(50) NOT NULL default '',
+  site_url varchar(100) NOT NULL default '',
+  site_phpex varchar(4) NOT NULL default 'php',
+  site_profile varchar(50) NOT NULL default 'profile',
+  site_enable tinyint(1) NOT NULL default '1',
+  PRIMARY KEY  (site_id)
+) TYPE=MyISAM;
+
+# --------------------------------------------------------
+#
+# Table structure for table 'phpbb_im_sessions'
+#
+CREATE TABLE phpbb_im_sessions (
+  session_user_id mediumint(8) NOT NULL default '0',
+  session_id char(32) NOT NULL default '',
+  session_time int(11) NOT NULL default '0',
+  session_popup tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (session_id),
+  KEY session_user_id (session_user_id)
+) TYPE=MyISAM;
+
+# --------------------------------------------------------
+#
+# Table structure for table 'phpbb_im_config'
+#
+CREATE TABLE phpbb_im_config (
+  config_name varchar(255) NOT NULL default '',
+  config_value varchar(255) NOT NULL default '',
+  PRIMARY KEY  (config_name)
+) TYPE=MyISAM;
+
+#
+# Dumping data for table `phpbb_im_sites`
+#
+INSERT INTO phpbb_im_sites (site_id, site_name, site_url, site_phpex, site_profile, site_enable) VALUES (1, 'DarkMods', 'http://darkmods.sourceforge.net/mb/', 'php', 'profile', 1);
+
+#
+# Dumping data for table `phpbb_im_config`
+#
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('refresh_rate', '60');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('flood_interval', '15');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('success_close', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('refresh_method', '2');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('auto_launch', '0');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('popup_ims', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('list_ims', '0');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('mode1_height', '400');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('mode1_width', '225');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('read_height', '300');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('read_width', '400');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('send_height', '365');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('send_width', '460');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('list_all_online', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('show_controls', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('allow_ims', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('allow_shout', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('allow_chat', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('override_users', '0');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('enable_flood', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('box_limit', '25');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('refresh_drop', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('play_sound', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('sound_name', '');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('default_sound', '0');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('themes_allow', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('themes_id', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('allow_network', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('session_length', '120');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('enable_im_limit', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('auto_delete', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('network_user_list', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('default_mode', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('prefs_height', '350');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('prefs_width', '500');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('use_frames', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('network_profile', 'profile');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('version', '0.7.0');
+
+
+Postgres
+~~~~~~~~
+
+8th May 2004
+~~~~~~~~~~~~
+
+ALTER TABLE phpbb_users ADD COLUMN user_custom_title varchar(255) NULL;
+ALTER TABLE phpbb_users ADD COLUMN user_custom_title_status int2;
+ALTER TABLE phpbb_users ALTER COLUMN user_custom_title_status SET DEFAULT '0';
+
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('custom_title_days', 0);
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('custom_title_posts', 0);
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('custom_title_mode', 0);
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('custom_title_maxlength', 45);
+
+
+Before 7th May 2004
+~~~~~~~~~~~~~~~~~~~
+
+CREATE TABLE phpbb_modules (
+  module_id int4 DEFAULT nextval('phpbb_modules_id_seq'::text) NOT NULL,
+  module_name varchar(64) NOT NULL default '',
+  module_type int4 NOT NULL default '0',
+  module_displayname varchar(64) NOT NULL default '',
+  module_description varchar(255) NOT NULL default '',
+  module_version varchar(10) NOT NULL default '',
+  module_files text,
+  module_templates text,
+  module_admin text,
+  module_blocks text,
+  module_language text,
+  module_constants text,
+  module_headers text,
+  module_state int2 NOT NULL default '0',
+  CONSTRAINT phpbb_modules_pkey PRIMARY KEY (module_id)
+);
+
+ALTER TABLE phpbb_categories ADD cat_main_type char(1);
+ALTER TABLE phpbb_categories ADD cat_main int4 DEFAULT '0' NOT NULL;
+ALTER TABLE phpbb_categories ADD cat_desc text NOT NULL;
+ALTER TABLE phpbb_categories ADD icon varchar(255);
+
+ALTER TABLE phpbb_forums ADD forum_link varchar(255);
+ALTER TABLE phpbb_forums ADD forum_link_internal int2 NOT NULL;
+ALTER TABLE phpbb_forums ADD forum_link_hit_count int2 NOT NULL;
+ALTER TABLE phpbb_forums ADD forum_link_hit int8 NOT NULL;
+ALTER TABLE phpbb_forums ADD icon varchar(255);
+ALTER TABLE phpbb_forums ADD main_type char(1);
+
+ALTER TABLE phpbb_users ADD user_sub_forum int2 DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_split_cat int2 DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_last_topic_title int2 DEFAULT '1' NOT NULL;
+ALTER TABLE phpbb_users ADD user_sub_level_links int2 DEFAULT '2' NOT NULL;
+ALTER TABLE phpbb_users ADD user_display_viewonline int2 DEFAULT '2' NOT NULL;
+
+/*
+* Prillian PostgresSQL Schema
+* Last updated in Prillian 0.7.0
+*
+* This file is completely untested - use at your own risk
+*/
+
+CREATE SEQUENCE phpbb_im_prefs_id_seq start 3 increment 1 maxvalue 2147483647 minvalue 1 cache 1;
+CREATE SEQUENCE phpbb_im_sites_id_seq start 3 increment 1 maxvalue 2147483647 minvalue 1 cache 1;
+
+
+
+/* --------------------------------------------------------
+
+Table structure for table `phpbb_im_prefs`
+
+You might want to change the default values for some of the columns in this table
+if you want to restrict the default settings for users.  Any column with "int2"
+can have default values of 1 (on/true) or 0 (off/false).
+The exceptions to this are:
+  show_controls : 0 = no controls, 1 = images only, 2 = links only, 3 = both
+  list_all_online : 1 = all online users, 2 = buddies on forums, 3 = buddies on IM,
+      4 = all users on im
+  refresh_method : 0 = Meta, 1 = Javascript, 2 = Both
+  network_user_list : 0 = Don't list Off-Site Users, 1 = List with On-Sites,
+      2 = List separately
+  default_mode : 0 = Last mode used, 1 = Main Mode, 2 = Wide Mode, 3 = Mini Mode
+  current_mode : 1 = Main Mode, 2 = Wide Mode, 3 = Mini Mode
+-------------------------------------------------------- */
+
+CREATE TABLE phpbb_im_prefs (
+  user_id int4 DEFAULT nextval('phpbb_im_prefs_id_seq'::text) NOT NULL,
+  user_allow_ims int2 DEFAULT '1' NOT NULL,
+  user_allow_shout int2 DEFAULT '1' NOT NULL,
+  user_allow_chat int2 DEFAULT '1' NOT NULL,
+  user_allow_network int2 DEFAULT '1' NOT NULL,
+  admin_allow_ims int2 DEFAULT '1' NOT NULL,
+  admin_allow_shout int2 DEFAULT '1' NOT NULL,
+  admin_allow_chat int2 DEFAULT '1' NOT NULL,
+  admin_allow_network int2 DEFAULT '1' NOT NULL,
+  new_ims int2 DEFAULT '0' NOT NULL,
+  unread_ims int2 DEFAULT '0' NOT NULL,
+  read_ims int2 DEFAULT '0' NOT NULL,
+  total_sent int4 DEFAULT '0' NOT NULL,
+  attach_sig int2 DEFAULT '0' NOT NULL,
+  refresh_rate int2 DEFAULT '60' NOT NULL,
+  success_close int2 DEFAULT '1' NOT NULL,
+  refresh_method int2 DEFAULT '2' NOT NULL,
+  auto_launch int2 DEFAULT '1' NOT NULL,
+  popup_ims int2 DEFAULT '1' NOT NULL,
+  list_ims int2 DEFAULT '0' NOT NULL,
+  show_controls int2 DEFAULT '1' NOT NULL,
+  list_all_online int2 DEFAULT '1' NOT NULL,
+  default_mode int2 DEFAULT '1' NOT NULL,
+  current_mode int2 DEFAULT '1' NOT NULL,
+  mode1_height varchar(4) DEFAULT '400' NOT NULL,
+  mode1_width varchar(4) DEFAULT '225' NOT NULL,
+  mode2_height varchar(4) DEFAULT '225' NOT NULL,
+  mode2_width varchar(4) DEFAULT '400' NOT NULL,
+  mode3_height varchar(4) DEFAULT '100' NOT NULL,
+  mode3_width varchar(4) DEFAULT '400' NOT NULL,
+  prefs_width varchar(4) DEFAULT '500' NOT NULL,
+  prefs_height varchar(4) DEFAULT '350' NOT NULL,
+  read_height varchar(4) DEFAULT '300' NOT NULL,
+  read_width varchar(4) DEFAULT '400' NOT NULL,
+  send_height varchar(4) DEFAULT '365' NOT NULL,
+  send_width varchar(4) DEFAULT '460' NOT NULL,
+  play_sound int2 DEFAULT '1' NOT NULL,
+  default_sound int2 DEFAULT '1' NOT NULL,
+  sound_name varchar(255),
+  themes_id int4 DEFAULT '1' NOT NULL,
+  network_user_list int2 DEFAULT '1' NOT NULL,
+  open_pms int2 DEFAULT '0' NOT NULL,
+  auto_delete int2 DEFAULT '0' NOT NULL,
+  use_frames int2 DEFAULT '1' NOT NULL,
+  user_override int2 DEFAULT '0' NOT NULL,
+  CONSTRAINT phpbb_im_prefs_pkey PRIMARY KEY (user_id)
+);
+
+/* --------------------------------------------------------
+*
+* Table structure for table 'phpbb_im_sites'
+*
+-------------------------------------------------------- */
+
+CREATE TABLE phpbb_im_sites (
+   site_id int4 DEFAULT nextval('phpbb_im_sites_id_seq'::text) NOT NULL,
+   site_name varchar(50) NOT NULL,
+   site_url varchar(100) NOT NULL,
+   site_phpex varchar(4) DEFAULT 'php' NOT NULL,
+   site_profile varchar(50) DEFAULT 'profile' NOT NULL,
+   site_enable int2 DEFAULT '1' NOT NULL,
+   CONSTRAINT phpbb_im_sites_pkey PRIMARY KEY (site_id)
+);
+
+/* --------------------------------------------------------
+*
+* Table structure for table 'phpbb_im_sessions'
+*
+-------------------------------------------------------- */
+
+CREATE TABLE phpbb_im_sessions (
+   session_user_id int4 DEFAULT '0' NOT NULL,
+   session_id char(32) DEFAULT '' NOT NULL,
+   session_time int4 DEFAULT '0' NOT NULL,
+   session_popup int2 DEFAULT '0' NOT NULL,
+   CONSTRAINT phpbb_im_sessions_pkey PRIMARY KEY (session_id)
+);
+CREATE  INDEX session_user_id_phpbb_im_sessions_index ON phpbb_im_sessions (session_user_id);
+
+ALTER TABLE phpbb_instmsgs ADD COLUMN instmsgs_from_username varchar(25) DEFAULT '' NOT NULL;
+ALTER TABLE phpbb_instmsgs ADD COLUMN instmsgs_to_username varchar(25) DEFAULT '' NOT NULL;
+ALTER TABLE phpbb_instmsgs ADD COLUMN site_id int2 DEFAULT '0' NOT NULL;
+CREATE  INDEX site_id_phpbb_instmsgs ON phpbb_instmsgs (site_id);
+
+/*
+* Basic DB data for Prillian Messenger
+*
+* This file is completely untested - use at your own risk
+*/
+
+/* Site-to-Site */
+INSERT INTO phpbb_im_sites (site_id, site_name, site_url, site_phpex, site_profile, site_enable) VALUES (1, 'DarkMods', 'http://darkmods.sourceforge.net/mb/', 'php', 'profile', 1);
+
+/* Config */
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('refresh_rate', '60');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('flood_interval', '15');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('success_close', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('refresh_method', '2');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('auto_launch', '0');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('popup_ims', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('list_ims', '0');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('mode1_height', '400');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('mode1_width', '225');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('mode2_height', '250');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('mode2_width', '400');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('read_height', '300');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('read_width', '400');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('send_height', '365');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('send_width', '460');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('list_all_online', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('show_controls', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('allow_ims', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('allow_shout', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('allow_chat', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('override_users', '0');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('enable_flood', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('box_limit', '25');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('refresh_drop', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('play_sound', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('sound_name', '');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('default_sound', '0');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('themes_allow', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('themes_id', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('allow_network', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('session_length', '120');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('enable_im_limit', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('auto_delete', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('open_pms', '0');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('network_user_list', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('default_mode', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('mode3_height', '100');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('mode3_width', '400');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('prefs_height', '350');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('prefs_width', '500');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('use_frames', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('network_profile', 'profile');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('allow_mode_switch', '1');
+
+/* This one changes with each new version */
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('version', '0.7.0');
+
+MS-SQL
+~~~~~~
+
+May 8th 2004
+~~~~~~~~~~~~
+
+ALTER TABLE phpbb_users ADD user_custom_title varchar(255) NULL;
+ALTER TABLE phpbb_users ADD user_custom_title_status tinyint NOT NULL,
+CONSTRAINT [DF_phpbb_users_user_custom_title_status] DEFAULT (0) FOR [user_custom_title_status];
+
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('custom_title_days', 0);
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('custom_title_posts', 0);
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('custom_title_mode', 0);
+INSERT INTO phpbb_config (config_name, config_value) VALUES ('custom_title_maxlength', 45);
+
+Before May 7th 2004
+~~~~~~~~~~~~~~~~~~~
+
+CREATE TABLE [phpbb_im_prefs] (
+[user_id] [int] NOT NULL ,
+[user_allow_ims] [int] NOT NULL ,
+[user_allow_shout] [int] NOT NULL ,
+[user_allow_chat] [int] NOT NULL ,
+[user_allow_network] [int] NOT NULL ,
+[admin_allow_ims] [int] NOT NULL ,
+[admin_allow_shout] [int] NOT NULL ,
+[admin_allow_chat] [int] NOT NULL ,
+[admin_allow_network] [int] NOT NULL ,
+[new_ims] [int] NOT NULL ,
+[unread_ims] [int] NOT NULL ,
+[read_ims] [int] NOT NULL ,
+[total_sent] [int] NOT NULL ,
+[attach_sig] [int] NOT NULL ,
+[refresh_rate] [int] NOT NULL ,
+[success_close] [int] NOT NULL ,
+[refresh_method] [int] NOT NULL ,
+[auto_launch] [int] NOT NULL ,
+[popup_ims] [int] NOT NULL ,
+[list_ims] [int] NOT NULL ,
+[show_controls] [int] NOT NULL ,
+[list_all_online] [int] NOT NULL ,
+[default_mode] [int] NOT NULL ,
+[current_mode] [int] NOT NULL ,
+[mode1_height] [varchar] (4) NOT NULL ,
+[mode1_width] [varchar] (4) NOT NULL ,
+[mode2_height] [varchar] (4) NOT NULL ,
+[mode2_width] [varchar] (4) NOT NULL ,
+[mode3_height] [varchar] (4) NOT NULL ,
+[mode3_width] [varchar] (4) NOT NULL ,
+[prefs_height] [varchar] (4) NOT NULL ,
+[prefs_width] [varchar] (4) NOT NULL ,
+[read_height] [varchar] (4) NOT NULL ,
+[read_width] [varchar] (4) NOT NULL ,
+[send_height] [varchar] (4) NOT NULL ,
+[send_width] [varchar] (4) NOT NULL ,
+[play_sound] [int] NOT NULL ,
+[default_sound] [int] NOT NULL ,
+[sound_name] [varchar] (255) default NULL,
+[themes_id] [int] NOT NULL,
+[network_user_list] [int] NOT NULL ,
+[open_pms] [int] NOT NULL ,
+[auto_delete] [int] NOT NULL ,
+[use_frames] [int] NOT NULL ,
+[user_override] [int] NOT NULL
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [phpbb_im_prefs] WITH NOCHECK ADD
+CONSTRAINT [PK_phpbb_im_prefs] PRIMARY KEY CLUSTERED
+(
+[user_id]
+) ON [PRIMARY]
+GO
+
+CREATE TABLE [phpbb_im_sites] (
+[site_id] [int] IDENTITY (1, 1) NOT NULL ,
+[site_name] [varchar] (50) NOT NULL ,
+[site_url] [varchar] (100) NOT NULL ,
+[site_phpex] [varchar] (4) NOT NULL ,
+[site_profile] [varchar] (50) NOT NULL
+PRIMARY KEY (site_id)
+) ON [PRIMARY]
+GO
+
+
+CREATE TABLE [phpbb_im_sessions] (
+[session_user_id] [int] NOT NULL ,
+[session_id] [char] (32) NOT NULL ,
+[session_time] [int] NOT NULL ,
+[session_popup] [int] NOT NULL
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [phpbb_im_sessions] WITH NOCHECK ADD
+CONSTRAINT [PK_phpbb_im_sessions] PRIMARY KEY CLUSTERED
+(
+[session_id]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [phpbb_im_sessions] WITH NOCHECK ADD
+CONSTRAINT [DF_phpbb_im_sessions_session_popup] DEFAULT (0) FOR [session_popup]
+GO
+
+CREATE INDEX [IX_phpbb_im_sessions] ON [phpbb_im_sessions]([session_user_id]) ON [PRIMARY]
+GO
+
+
+/*
+ Alterations to pre-existing tables for Prillian Messenger
+
+ This file is completely untested - use at your own risk
+*/
+ALTER TABLE [phpbb_instmsgs] ADD
+[instmsgs_from_username] [varchar] (25) NOT NULL ,
+CONSTRAINT [DF_phpbb_instmsgs_instmsgs_from_username] DEFAULT ('') FOR [instmsgs_from_username],
+[instmsgs_to_username] [varchar] (25) NOT NULL ,
+CONSTRAINT [DF_phpbb_instmsgs_instmsgs_to_username] DEFAULT ('') FOR [instmsgs_to_username],
+[site_id] [int] NOT NULL ,
+CONSTRAINT [DF_phpbb_instmsgs_site_id] DEFAULT (0) FOR [site_id],
+GO
+
+CREATE INDEX [IX_phpbb_instmsgs_2] ON [phpbb_instmsgs]([site_id]) ON [PRIMARY]
+GO
+
+/*
+  -- Site-to-Site
+*/
+INSERT INTO phpbb_im_sites (site_id, site_name, site_url, site_phpex, site_profile, site_enable) VALUES (1, 'DarkMods', 'http://darkmods.sourceforge.net/mb/', 'php', 'profile', 1);
+INSERT INTO phpbb_im_sites (site_id, site_name, site_url, site_phpex, site_profile, site_enable) VALUES (0, 'Moto-Forum', 'http://www.moto-forum.it/forum/', 'php', 'profile', 1);
+
+/*
+  -- Config
+*/
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('refresh_rate', '60');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('flood_interval', '15');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('success_close', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('refresh_method', '2');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('auto_launch', '0');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('popup_ims', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('list_ims', '0');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('mode1_height', '400');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('mode1_width', '225');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('mode2_height', '250');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('mode2_width', '400');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('read_height', '300');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('read_width', '400');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('send_height', '365');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('send_width', '460');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('list_all_online', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('show_controls', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('allow_ims', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('allow_shout', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('allow_chat', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('override_users', '0');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('enable_flood', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('box_limit', '25');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('refresh_drop', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('play_sound', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('sound_name', '');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('default_sound', '0');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('themes_allow', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('themes_id', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('allow_network', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('session_length', '120');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('enable_im_limit', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('auto_delete', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('open_pms', '0');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('network_user_list', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('default_mode', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('mode3_height', '100');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('mode3_width', '400');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('prefs_height', '350');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('prefs_width', '500');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('use_frames', '1');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('network_profile', 'profile');
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('allow_mode_switch', '1');
+
+/*
+  -- This one changes with each new version
+*/
+INSERT INTO phpbb_im_config (config_name, config_value) VALUES ('version', '0.7.0');

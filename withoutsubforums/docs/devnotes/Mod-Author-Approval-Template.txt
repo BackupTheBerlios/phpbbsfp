@@ -1,0 +1,72 @@
+DRAFT - 3
+
+Hello,
+
+My name is Martin and I am the lead developer and project coordinator
+for Minerva, a *real* portal solution derived from phpBB2 and licensed
+under the GPL. You can find out more about Minerva from...
+
+http://www.flexion.org
+http://minerva.sourceforge.net
+http://www.sourceforge.net/projects/minerva/
+http://www.project-minerva.org
+
+We are seeking approval to include your...
+
+* [ enter mod(s) here ]
+
+...modification(s) in our current development version of Minerva R3.
+If you mod(s) is based on, or extends someone elses code, then we
+have already contacted that developer and received approval from them.
+
+As stated above, Minerva is released under the GPL and CVS is
+(anonymously) available to anyone who would like it. If you are
+agreeable in allowing us use your code, then we will add details
+of your contribution to our credits database, which will also be
+bundled with R3 when we release it officially.
+
+If you have any other terms of use then let me know, I am will try to
+accommodate them :-) If you are interested then you can find a little
+more detail about Minerva in the text below.
+
+Thanks in advance, Martin.
+
+
+
+
+
+More About Project Minerva
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+So far we have released a beta of Minerva R2, but since that initial
+release the development team decided to go back to the drawing board.
+Learning from the work we have done previously and acting of user
+feedback we are going to correct the things we didn't get quite right
+first time around.
+
+We are currently working on the Minerva R3 core. Minerva R3 is still
+based on phpBB 2.0.8a but this time we are attempting to addresses
+several areas where we felt Minerva R2 failed.
+
+1. Improved performance and scalability
+2. Improved modularity
+3. Improved ease of use
+4. Less bloat
+
+1. Database caching is used extensively and new features are selected
+and added carefully so as not to over burden the DBMS or server load.
+This work is not complete however but over the coming weeks it will be
+improved significantly.
+
+2. We have created a modules system and have integrated a customized
+version of IM Portal as our blocks engine. This means that R3 is more
+like a *Nuke portal in the way new modules and blocks can be uploaded,
+installed and enabled without having to manually edit the core
+files/template to extend a site. Every page and module can have its own
+block selection and placement.
+
+3 & 4. Less is more ;-) Minerva R2 initially set out to be a fairly slim
+phpBB portal, but it soon became quite fat. Thanks in part to the block
+and module engine this can be avoided in R3, but we are also aware which
+features of R2 were little used, and these are being dropped in favour
+of performance and ease of use.

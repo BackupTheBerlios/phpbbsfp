@@ -1,0 +1,53 @@
+How to install Minerva R3
+
+1. Extract the archive or copy the latest CVS snapshot to you server. You can put R3 in the root, or a subdirectory of your web server.
+
+2. File permissions
+
+chmod 666 config.php
+chmod 666 includes/def_*
+chmod 666 templates/subSilver/sub_templates.cfg
+chmod -R 666 language/lang_english/lang_extend_*.php
+chmod -R 666 profilcp/def/def_*.php
+chmod -R 777 cache/*
+chmod -R 777 files/*
+
+3. Using LDAP?
+
+If you plan on using LDAP Authentication, then make sure that the Administrator
+account you create during the install, has the same name as an account in LDAP
+otherwise you will not have admin access when you change the authentication mode.
+
+4. Open a browser and go to...
+
+http://www.yoursite.com/where-you-put-minerva/
+
+...and follow the installation instructions.
+
+5. Clean up
+
+Remove /install
+Remove /contrib
+
+chmod 644 config.php
+
+6. Post install ** IMPORTANT **
+
+Go to the Admin Control Panel and do the following...
+
+  (I am trying to get the install script to do everything we need...)
+
+ACP::Configuration +
+  - Privacy         Set everything to *Yes* and click *Submit*
+  - Notification    Set everything to *Yes* and click *Submit*
+  - Posting         Set everything to *Yes* and click *Submit*
+  - Reading         Set everything to *Yes* and click *Submit*
+
+ACP::Configuration +
+  - Configure Prinvacy, Notification, Posting and Reading as you would like.
+
+NOTE! Until you do the the Memeberlist and Buddy List won't work for non Admin members.
+
+7. Edit download.php (Optional)
+
+You can enable some anti leech features to for file attachment downloading.

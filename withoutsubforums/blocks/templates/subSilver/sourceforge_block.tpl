@@ -1,0 +1,1 @@
+<div align="center"><a href="http://sourceforge.net" target="_blank"><img src="http://sourceforge.net/sflogo.php?group_id={SOURCEFORGE_GROUP_ID}&amp;type=2" width="125" height="37" border="0" alt="Sourceforge Logo" /></a></div>
