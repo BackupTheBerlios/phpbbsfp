@@ -6,7 +6,7 @@
  *   copyright            : (C) 2001 The phpBB Group
  *   email                : support@phpbb.com
  *
- *   $Id: viewforum.php,v 1.3 2004/09/02 00:01:40 dmaj007 Exp $
+ *   $Id: viewforum.php,v 1.4 2004/09/02 17:39:03 dmaj007 Exp $
  *
  *
  ***************************************************************************/
@@ -49,7 +49,7 @@ if ($user->data['user_id'] == ANONYMOUS) {
 } else {
 	switch (SQL_LAYER) {
 		case 'oracle':
-			if ($config['load_db_lastread']) {
+			if ($board_config['load_db_lastread']) {
 			} else {
 			} 
 			break;
@@ -147,7 +147,7 @@ if ($forum_data['forum_type'] == FORUM_POST || ($forum_data['forum_flags'] &16))
 	} 
 	// Is a forum specific topic count required?
 	if ($forum_data['forum_topics_per_page']) {
-		$config['topics_per_page'] = $forum_data['forum_topics_per_page'];
+		$board_config['topics_per_page'] = $forum_data['forum_topics_per_page'];
 	} 
 	// Do the forum Prune thang - cron type job ...
 	if ($forum_data['prune_next'] < time() && $forum_data['enable_prune']) {
@@ -163,7 +163,7 @@ if ($forum_data['forum_type'] == FORUM_POST || ($forum_data['forum_flags'] &16))
 	// Forum rules amd subscription info
 	$s_watching_forum = $s_watching_forum_img = array();
 	$s_watching_forum['link'] = $s_watching_forum['title'] = '';
-	if (($config['email_enable'] || $config['jab_enable']) && $config['allow_forum_notify'] && $auth->acl_get('f_subscribe', $forum_id)) {
+	if (($board_config['email_enable'] || $board_config['jab_enable']) && $board_config['allow_forum_notify'] && $auth->acl_get('f_subscribe', $forum_id)) {
 		$notify_status = (isset($forum_data['notify_status'])) ? $forum_data['notify_status'] : null;
 		watch_topic_forum('forum', $s_watching_forum, $s_watching_forum_img, $user->data['user_id'], $forum_id, $notify_status);
 	} 
@@ -171,9 +171,9 @@ if ($forum_data['forum_type'] == FORUM_POST || ($forum_data['forum_flags'] &16))
 	$s_forum_rules = '';
 	gen_forum_auth_level('forum', $forum_id); 
 	// Topic ordering options
-	$limit_days = array(0 => $user->lang['ALL_TOPICS'], 1 => $user->lang['1_DAY'], 7 => $user->lang['7_DAYS'], 14 => $user->lang['2_WEEKS'], 30 => $user->lang['1_MONTH'], 90 => $user->lang['3_MONTHS'], 180 => $user->lang['6_MONTHS'], 364 => $user->lang['1_YEAR']);
+	$limit_days = array(0 => $user->lang['All_Topics'], 1 => $user->lang['1_Day'], 7 => $user->lang['7_Days'], 14 => $user->lang['2_Weeks'], 30 => $user->lang['1_Month'], 90 => $user->lang['3_Months'], 180 => $user->lang['6_Months'], 364 => $user->lang['1_Year']);
 
-	$sort_by_text = array('a' => $user->lang['AUTHOR'], 't' => $user->lang['POST_TIME'], 'r' => $user->lang['REPLIES'], 's' => $user->lang['SUBJECT'], 'v' => $user->lang['VIEWS']);
+	$sort_by_text = array('a' => $user->lang['Sort_Author'], 't' => $user->lang['Sort_Time'], 'r' => $user->lang['Replies'], 's' => $user->lang['Sort_Post_Subject'], 'v' => $user->lang['Views']);
 	$sort_by_sql = array('a' => 't.topic_first_poster_name', 't' => 't.topic_last_post_time', 'r' => 't.topic_replies', 's' => 't.topic_title', 'v' => 't.topic_views');
 
 	$s_limit_days = $s_sort_key = $s_sort_dir = $u_sort_param = '';
@@ -182,12 +182,11 @@ if ($forum_data['forum_type'] == FORUM_POST || ($forum_data['forum_flags'] &16))
 	if ($sort_days) {
 		$min_post_time = time() - ($sort_days * 86400);
 
-		$sql = 'SELECT COUNT(topic_id) AS num_topics
-				FROM ' . TOPICS_TABLE . "
-				WHERE forum_id = $forum_id
-					AND topic_type <> " . POST_ANNOUNCE . "  
-					AND topic_last_post_time >= $min_post_time
-				" . (($auth->acl_get('m_approve', $forum_id)) ? '' : 'AND topic_approved = 1');
+		$sql = "SELECT COUNT(t.topic_id) AS forum_topics 
+		FROM " . TOPICS_TABLE . " t, " . POSTS_TABLE . " p 
+		WHERE t.forum_id = $forum_id 
+			AND p.post_id = t.topic_last_post_id
+			AND p.post_time >= $min_topic_time";
 		$result = $db->sql_query($sql);
 
 		if (isset($_POST['sort'])) {
@@ -260,7 +259,6 @@ if ($forum_data['forum_type'] == FORUM_POST || ($forum_data['forum_flags'] &16))
 	} 
 	// $sql_approved = ($auth->acl_get('m_approve', $forum_id)) ? '' : 'AND t.topic_approved = 1';
 	$sql_select = (($board_config['load_db_lastread'] || $board_config['load_db_track']) && $user->data['user_id'] != ANONYMOUS) ? ', tt.mark_type, tt.mark_time' : '';
-
 	if ($forum_data['forum_type'] == FORUM_POST) {
 		// Obtain announcements ... removed sort ordering, sort by time in all cases
 		$sql = "SELECT t.* $sql_select 
@@ -297,19 +295,24 @@ if ($forum_data['forum_type'] == FORUM_POST || ($forum_data['forum_flags'] &16))
 	// $sql_rownum = (SQL_LAYER != 'oracle') ? '' : ', ROWNUM rnum ';
 	$sql_rownum = '';
 	$sql_where = ($forum_data['forum_type'] == FORUM_POST) ? "= $forum_id" : 'IN (' . implode(', ', $active_forum_ary['forum_id']) . ')';
-	$sql = "SELECT t.* $sql_select$sql_rownum 
-			FROM $sql_from
-			WHERE t.forum_id $sql_where
-				AND t.topic_type NOT IN (" . POST_ANNOUNCE . ', ' . POST_GLOBAL . ") 
-				$sql_approved 
-				$sql_limit_time
-			ORDER BY t.topic_type DESC, $sql_sort_order";
-	$result = $db->sql_query_limit($sql, $sql_limit, $sql_start);
-
+$sql = "SELECT t.*, u.username, u.user_id, u2.username as user2, u2.user_id as id2, p.post_username, p2.post_username AS post_username2, p2.post_time 
+	FROM " . TOPICS_TABLE . " t, " . USERS_TABLE . " u, " . POSTS_TABLE . " p, " . POSTS_TABLE . " p2, " . USERS_TABLE . " u2
+	WHERE t.forum_id = $forum_id
+		AND t.topic_poster = u.user_id
+		AND p.post_id = t.topic_first_post_id
+		AND p2.post_id = t.topic_last_post_id
+		AND u2.user_id = p2.poster_id 
+		AND t.topic_type <> " . POST_ANNOUNCE . " 
+		$limit_topics_time
+	ORDER BY t.topic_type DESC, t.topic_last_post_id DESC 
+	LIMIT $start, ".$board_config['topics_per_page'];
+	$result = $db->sql_query($sql, $sql_limit, $sql_start);
+echo $result;
 	while ($row = $db->sql_fetchrow($result)) {
 		$rowset[$row['topic_id']] = $row;
 		$topic_list[] = $row['topic_id'];
 	} 
+
 	$db->sql_freeresult($result);
 
 	$topic_list = ($store_reverse) ? array_merge($announcement_list, array_reverse($topic_list)) : array_merge($announcement_list, $topic_list); 
@@ -332,7 +335,7 @@ if ($forum_data['forum_type'] == FORUM_POST || ($forum_data['forum_flags'] &16))
 			} else {
 				$topic_id36 = base_convert($topic_id, 10, 36);
 				$forum_id36 = ($row['topic_type'] == POST_GLOBAL) ? 0 : $row['forum_id'];
-				$mark_time_topic = (isset($tracking_topics[$forum_id36][$topic_id36])) ? base_convert($tracking_topics[$forum_id36][$topic_id36], 36, 10) + $config['board_startdate'] : 0;
+				$mark_time_topic = (isset($tracking_topics[$forum_id36][$topic_id36])) ? base_convert($tracking_topics[$forum_id36][$topic_id36], 36, 10) + $board_config['board_startdate'] : 0;
 			} 
 			// Replies
 			$replies = ($auth->acl_get('m_approve', $forum_id)) ? $row['topic_replies_real'] : $row['topic_replies']; 
@@ -361,7 +364,7 @@ if ($forum_data['forum_type'] == FORUM_POST || ($forum_data['forum_flags'] &16))
 						break;
 
 					default:
-						if ($replies >= $config['hot_threshold']) {
+						if ($replies >= $board_config['hot_threshold']) {
 							$folder = 'folder_hot';
 							$folder_new = 'folder_hot_new';
 						} else {
@@ -407,7 +410,7 @@ if ($forum_data['forum_type'] == FORUM_POST || ($forum_data['forum_flags'] &16))
 			} 
 			// Goto message generation
 			// Note: Template this a little bit more to allow style authors seperating goto_page, next, prev and pagination block?
-			if (($replies + 1) > $config['posts_per_page']) {
+			if (($replies + 1) > $board_config['posts_per_page']) {
 				$total_pages = ceil(($replies + 1) / $board_config['posts_per_page']); 
 				// $goto_page = ' [ ' . $user->img('icon_post', 'GOTO_PAGE') . $user->lang['GOTO_PAGE'] . ': ';
 				$times = 1;
@@ -441,7 +444,7 @@ if ($forum_data['forum_type'] == FORUM_POST || ($forum_data['forum_flags'] &16))
 					'TOPIC_ID' => $topic_id,
 					'TOPIC_AUTHOR' => $topic_author,
 
-					'FIRST_POST_TIME' => $user->format_date($row['topic_time'], $config['board_timezone']),
+					'FIRST_POST_TIME' => $user->format_date($row['topic_time'], $board_config['board_timezone']),
 					'LAST_POST_TIME' => $user->format_date($row['topic_last_post_time']),
 					'LAST_VIEW_TIME' => $user->format_date($row['topic_last_view_time']),
 
@@ -470,7 +473,7 @@ if ($forum_data['forum_type'] == FORUM_POST || ($forum_data['forum_flags'] &16))
 
 			$s_type_switch = ($row['topic_type'] == POST_ANNOUNCE || $row['topic_type'] == POST_GLOBAL) ? 1 : 0;
 
-			if ($config['load_db_lastread']) {
+			if ($board_config['load_db_lastread']) {
 				if ((isset($row['mark_time']) && $row['topic_last_post_time'] > $row['mark_time']) || (empty($row['mark_time']) && $row['topic_last_post_time'] > $forum_data['mark_time'])) {
 					// sync post/topic marking
 					if (isset($unread_topc) && !$unread_topic && !empty($row['mark_time']) && $row['mark_time']) {
