@@ -6,7 +6,7 @@
  *   copyright            : (C) 2001 The phpBB Group
  *   email                : support@phpbb.com
  *
- *   $Id: viewforum.php,v 1.5 2004/09/03 00:32:58 dmaj007 Exp $
+ *   $Id: viewforum.php,v 1.6 2004/09/03 00:47:30 dmaj007 Exp $
  *
  *
  ***************************************************************************/
@@ -66,7 +66,7 @@ if ($user->data['user_id'] == ANONYMOUS) {
 
 				if (!isset($tracking_topics[$forum_id]) && $user->data['user_id'] != ANONYMOUS) {
 					markread('mark', $forum_id);
-					//redirect(append_sid("viewforum.$phpEx?f=$forum_id"));
+					redirect(append_sid("viewforum.$phpEx?f=$forum_id"));
 				} 
 			} 
 
@@ -210,7 +210,7 @@ if ($forum_data['forum_type'] == FORUM_POST || ($forum_data['forum_flags'] &16))
 			'TOTAL_TOPICS' => ($forum_data['forum_flags'] &16) ? false : (($topics_count == 1) ? $user->lang['VIEW_FORUM_TOPIC'] : sprintf($user->lang['VIEW_FORUM_TOPICS'], $topics_count)),
 			'MODERATORS' => (!empty($moderators[$forum_id])) ? implode(', ', $moderators[$forum_id]) : '',
 
-			'POST_IMG' => ($forum_data['forum_status'] == ITEM_LOCKED) ? $user->img('btn_locked', $post_alt) : $user->img('btn_post', $post_alt),
+			'POST_IMG' => ($forum_data['forum_status'] == ITEM_LOCKED) ? $user->img('post_locked', $post_alt) : $user->img('post_new', $post_alt),
 			'FOLDER_IMG' => $user->img('folder', 'NO_NEW_POSTS'),
 			'FOLDER_NEW_IMG' => $user->img('folder_new', 'NEW_POSTS'),
 			'FOLDER_HOT_IMG' => $user->img('folder_hot', 'NO_NEW_POSTS_HOT'),
@@ -432,29 +432,30 @@ echo $result;
 			// Generate all the URIs ...
 			$view_topic_url = "viewtopic.$phpEx$SID&amp;f=" . (($row['forum_id']) ? $row['forum_id'] : $forum_id) . "&amp;t=$topic_id";
 
-			$topic_author = ($row['topic_poster'] != ANONYMOUS) ? "<a href=\"memberlist.$phpEx$SID&amp;mode=viewprofile&amp;u=" . $row['topic_poster'] . '">' : '';
-			$topic_author .= ($row['topic_poster'] != ANONYMOUS) ? $row['topic_first_poster_name'] : (($row['topic_first_poster_name'] != '') ? $row['topic_first_poster_name'] : $user->lang['GUEST']);
-			$topic_author .= ($row['topic_poster'] != ANONYMOUS) ? '</a>' : ''; 
+			$topic_author = ($row['id2'] != ANONYMOUS) ? "<a href=\"memberlist.$phpEx$SID&amp;mode=viewprofile&amp;u=" . $row['topic_poster'] . '">' : '';
+			$topic_author .= ($row['id2'] != ANONYMOUS) ? $row['username'] : (($row['username'] != '') ? $row['username'] : $user->lang['GUEST']);
+			$topic_author .= ($row['id2'] != ANONYMOUS) ? '</a>' : ''; 
 			// This will allow the style designer to output a different header
 			// or even seperate the list of announcements from sticky and normal
 			// topics
 			$s_type_switch_test = ($row['topic_type'] == POST_ANNOUNCE || $row['topic_type'] == POST_GLOBAL) ? 1 : 0; 
+			print_r($row);
 			// Send vars to template
 			$template->assign_block_vars('topicrow', array('FORUM_ID' => $forum_id,
 					'TOPIC_ID' => $topic_id,
 					'TOPIC_AUTHOR' => $topic_author,
 
 					'FIRST_POST_TIME' => $user->format_date($row['topic_time'], $board_config['board_timezone']),
-					'LAST_POST_TIME' => $user->format_date($row['topic_last_post_time']),
+					'LAST_POST_TIME' => $user->format_date($row['post_time']),
 					'LAST_VIEW_TIME' => $user->format_date($row['topic_last_view_time']),
 
-					'LAST_POST_AUTHOR' => ($row['topic_last_poster_name'] != '') ? $row['topic_last_poster_name'] : $user->lang['GUEST'],
+					'LAST_POST_AUTHOR' => ($row['post_username2'] != '') ? $row['post_username2'] : $user->lang['GUEST'],
 					'GOTO_PAGE' => $goto_page,
 					'REPLIES' => ($auth->acl_get('m_approve', $forum_id)) ? $row['topic_replies_real'] : $row['topic_replies'],
 					'VIEWS' => $row['topic_views'],
 					'TOPIC_TITLE' => ($row['topic_title']),
 					'TOPIC_TYPE' => $topic_type,
-					'LAST_POST_IMG' => $user->img('icon_post_latest', 'VIEW_LATEST_POST'),
+					'LAST_POST_IMG' => $user->img('icon_latest_reply', 'VIEW_LATEST_POST'),
 					'NEWEST_POST_IMG' => $newest_post_img,
 					'TOPIC_FOLDER_IMG' => $user->img($folder_img, $folder_alt),
 					'TOPIC_ICON_IMG' => (!empty($icons[$row['icon_id']])) ? '<img src="' . $board_config['icons_path'] . '/' . $icons[$row['icon_id']]['img'] . '" width="' . $icons[$row['icon_id']]['width'] . '" height="' . $icons[$row['icon_id']]['height'] . '" alt="" title="" />' : '',
