@@ -6,7 +6,7 @@
  *   copyright            : (C) 2001 The phpBB Group
  *   email                : support@phpbb.com
  *
- *   $Id: viewforum.php,v 1.4 2004/09/02 17:39:03 dmaj007 Exp $
+ *   $Id: viewforum.php,v 1.5 2004/09/03 00:32:58 dmaj007 Exp $
  *
  *
  ***************************************************************************/
@@ -66,7 +66,7 @@ if ($user->data['user_id'] == ANONYMOUS) {
 
 				if (!isset($tracking_topics[$forum_id]) && $user->data['user_id'] != ANONYMOUS) {
 					markread('mark', $forum_id);
-					redirect(append_sid("viewforum.$phpEx?f=$forum_id"));
+					//redirect(append_sid("viewforum.$phpEx?f=$forum_id"));
 				} 
 			} 
 
@@ -101,7 +101,7 @@ if ($forum_data['forum_link']) {
 	redirect($forum_data['forum_link']);
 } 
 // Configure style, language, etc.
-$user->setup('viewforum', $forum_data['forum_style']);
+// $user->setup('viewforum', $forum_data['forum_style']);
 // Forum is passworded ... check whether access has been granted to this
 // user this session, if not show login box
 if ($forum_data['forum_password']) {
