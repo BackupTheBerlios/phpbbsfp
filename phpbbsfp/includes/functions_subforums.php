@@ -1,6 +1,6 @@
 <?php
 
-// $Id: functions_subforums.php,v 1.2 2004/08/31 23:27:48 toonarmy Exp $
+// $Id: functions_subforums.php,v 1.3 2004/09/01 03:59:57 dmaj007 Exp $
 
 function display_forums($root_data = '', $display_moderators = TRUE)
 {
@@ -153,7 +153,7 @@ print_r ($db->sql_error());
 			$forum_unread[$parent_id] = true;
 		}
 	}
-	$db->sql_freeresult();
+	$db->sql_freeresult($result);
 
 	// Handle marking posts
 	if ($mark_read == 'forums')
