@@ -1,10 +1,10 @@
 <?php
 
-// $Id: functions_subforums.php,v 1.3 2004/09/01 03:59:57 dmaj007 Exp $
+// $Id: functions_subforums.php,v 1.4 2004/09/01 16:44:33 dmaj007 Exp $
 
 function display_forums($root_data = '', $display_moderators = TRUE)
 {
-	global $board_config, $db, $template, $lang, $auth, $userdata, $phpEx, $SID, $forum_moderators, $phpbb_root_path;
+	global $board_config, $db, $template, $lang, $auth, $userdata, $phpEx, $forum_moderators, $phpbb_root_path;
 
 	// Get posted/get info
 	$mark_read = request_var('mark', '');
@@ -160,7 +160,7 @@ print_r ($db->sql_error());
 	{
 		markread('mark', $forum_id_ary);
 
-		$redirect = (!empty($_SERVER['REQUEST_URI'])) ? preg_replace('#^(.*?)&(amp;)?mark=.*$#', '\1', htmlspecialchars($_SERVER['REQUEST_URI'])) : "index.$phpEx$SID";
+		$redirect = (!empty($_SERVER['REQUEST_URI'])) ? preg_replace('#^(.*?)&(amp;)?mark=.*$#', '\1', htmlspecialchars($_SERVER['REQUEST_URI'])) : append_sid("index.$phpEx");
 		meta_refresh(3, $redirect);
 
 		$message = (strstr($redirect, 'viewforum')) ? 'RETURN_FORUM' : 'RETURN_INDEX';
@@ -226,7 +226,7 @@ print_r ($db->sql_error());
 					$links = array();
 					foreach ($alist as $subforum_id => $subforum_name)
 					{
-						$links[] = '<a href="viewforum.' . $phpEx . $SID . '&amp;f=' . $subforum_id . '">' . $subforum_name . '</a>';
+						$links[] = '<a href="' . append_sid('viewforum.' . $phpEx . '?f=' . $subforum_id) . '">' . $subforum_name . '</a>';
 					}
 					$subforums_list = implode(', ', $links);
 
@@ -316,12 +316,12 @@ print_r ($db->sql_error());
 			
 			'U_LAST_POSTER'		=> $last_poster_url, 
 			'U_LAST_POST'		=> $last_post_url, 
-			'U_VIEWFORUM'		=> ($row['forum_type'] != FORUM_LINK || $row['forum_flags'] & 1) ? "viewforum.$phpEx$SID&amp;f=" . $row['forum_id'] : $row['forum_link'])
+			'U_VIEWFORUM'		=> ($row['forum_type'] != FORUM_LINK || $row['forum_flags'] & 1) ? append_sid("viewforum.$phpEx?f=" . $row['forum_id']) : $row['forum_link'])
 		);
 	}
 
 	$template->assign_vars(array(
-		'U_MARK_FORUMS'		=> "viewforum.$phpEx$SID&amp;f=" . $root_data['forum_id'] . '&amp;mark=forums', 
+		'U_MARK_FORUMS'		=> append_sid("viewforum.$phpEx?f=" . $root_data['forum_id'] . '&amp;mark=forums'), 
 
 		'S_HAS_SUBFORUM'	=>	($visible_forums) ? true : false,
 
@@ -334,11 +334,11 @@ print_r ($db->sql_error());
 // Obtain list of moderators of each forum
 function get_moderators(&$forum_moderators, $forum_id = false)
 {
-	global $config, $template, $db, $phpEx, $SID;
+	global $board_config, $template, $db, $phpEx;
 
 	// Have we disabled the display of moderators? If so, then return
 	// from whence we came ... 
-	if (empty($config['load_moderators']))
+	if (empty($board_config['load_moderators']))
 	{
 		return;
 	}
@@ -360,13 +360,176 @@ function get_moderators(&$forum_moderators, $forum_id = false)
 
 	while ($row = $db->sql_fetchrow($result))
 	{
-		$forum_moderators[$row['forum_id']][] = (!empty($row['user_id'])) ? '<a href="memberlist.' . $phpEx . $SID . '&amp;mode=viewprofile&amp;u=' . $row['user_id'] . '">' . $row['username'] . '</a>' : '<a href="groupcp.' . $phpEx . $SID . '&amp;g=' . $row['group_id'] . '">' . $row['groupname'] . '</a>';
+		$forum_moderators[$row['forum_id']][] = (!empty($row['user_id'])) ? '<a href="' . append_sid('memberlist.' . $phpEx . '?mode=viewprofile&amp;u=' . $row['user_id']) . '">' . $row['username'] . '</a>' : '<a href="' . append_sid('groupcp.' . $phpEx . '?g=' . $row['group_id']) . '">' . $row['groupname'] . '</a>';
 	}
 	$db->sql_freeresult($result);
 
 	return;
 }
 
+// User authorisation levels output
+function gen_forum_auth_level($mode, &$forum_id)
+{
+	global $template, $auth, $user;
+
+	$rules = array('post', 'reply', 'edit', 'delete', 'attach');
+
+	foreach ($rules as $rule)
+	{
+		/*$template->assign_block_vars('rules', array(
+			'RULE' => ($auth->acl_get('f_' . $rule, intval($forum_id))) ? $lang['RULES_' . strtoupper($rule) . '_CAN'] : $lang['RULES_' . strtoupper($rule) . '_CANNOT'])
+		);*/
+	}
+
+	return;
+}
+
+// Create forum navigation links for given forum, create parent
+// list if currently null, assign basic forum info to template
+function generate_forum_nav(&$forum_data)
+{
+	global $db, $user, $template, $phpEx, $phpbb_root_path;
+
+	// Get forum parents
+	$forum_parents = get_forum_parents($forum_data);
+
+	// Build navigation links
+	foreach ($forum_parents as $parent_forum_id => $parent_data)
+	{
+		list($parent_name, $parent_type) = array_values($parent_data);
+
+		$template->assign_block_vars('navlinks', array(
+			'S_IS_CAT'		=> ($parent_type == FORUM_CAT) ? true : false,
+			'S_IS_LINK'		=> ($parent_type == FORUM_LINK) ? true : false,
+			'S_IS_POST'		=> ($parent_type == FORUM_POST) ? true : false,
+			'FORUM_NAME'	=> $parent_name,
+			'FORUM_ID'		=> $parent_forum_id,
+			'U_VIEW_FORUM'	=> append_sid("{$phpbb_root_path}viewforum.$phpEx?f=$parent_forum_id"))
+		);
+	}
+
+	$template->assign_block_vars('navlinks', array(
+		'S_IS_CAT'		=> ($forum_data['forum_type'] == FORUM_CAT) ? true : false,
+		'S_IS_LINK'		=> ($forum_data['forum_type'] == FORUM_LINK) ? true : false,
+		'S_IS_POST'		=> ($forum_data['forum_type'] == FORUM_POST) ? true : false,
+		'FORUM_NAME'	=> $forum_data['forum_name'],
+		'FORUM_ID'		=> $forum_data['forum_id'],
+		'U_VIEW_FORUM'	=> append_sid("{$phpbb_root_path}viewforum.$phpEx?f=" . $forum_data['forum_id']))
+	);
+
+	$template->assign_vars(array(
+		'FORUM_ID' 		=> $forum_data['forum_id'],
+		'FORUM_NAME'	=> $forum_data['forum_name'],
+		'FORUM_DESC'	=> strip_tags($forum_data['forum_desc']))
+	);
+
+	return;
+}
+
+// Returns forum parents as an array. Get them from forum_data if available, or update the database otherwise
+function get_forum_parents(&$forum_data)
+{
+	global $db;
+
+	$forum_parents = array();
+
+	if ($forum_data['parent_id'] > 0)
+	{
+		if ($forum_data['forum_parents'] == '')
+		{
+			$sql = 'SELECT forum_id, forum_name, forum_type
+				FROM ' . FORUMS_TABLE . '
+				WHERE left_id < ' . $forum_data['left_id'] . '
+					AND right_id > ' . $forum_data['right_id'] . '
+				ORDER BY left_id ASC';
+			$result = $db->sql_query($sql);
+
+			while ($row = $db->sql_fetchrow($result))
+			{
+				$forum_parents[$row['forum_id']] = array($row['forum_name'], (int) $row['forum_type']);
+			}
+			$db->sql_freeresult($result);
+
+			$forum_data['forum_parents'] = serialize($forum_parents);
+
+			$sql = 'UPDATE ' . FORUMS_TABLE . "
+				SET forum_parents = '" . $db->sql_escape($forum_data['forum_parents']) . "'
+				WHERE parent_id = " . $forum_data['parent_id'];
+			$db->sql_query($sql);
+		}
+		else
+		{
+			$forum_parents = unserialize($forum_data['forum_parents']);
+		}
+	}
+
+	return $forum_parents;
+}
+
+// Create forum rules for given forum 
+function generate_forum_rules(&$forum_data)
+{
+	if (!$forum_data['forum_rules'] && !$forum_data['forum_rules_link'])
+	{
+		return;
+	}
+
+	global $template, $phpbb_root_path, $phpEx;
+
+	if ($forum_data['forum_rules'])
+	{
+		$text_flags = explode(':', $forum_data['forum_rules_flags']);
+	}
+
+	$template->assign_vars(array(
+		'S_FORUM_RULES'	=> true,
+		'U_FORUM_RULES'	=> $forum_data['forum_rules_link'],
+		'FORUM_RULES'	=> (!$forum_data['forum_rules_link']) ? parse_text_display($forum_data['forum_rules'], $forum_data['forum_rules_flags']) : '')
+	);
+}
+
+// prepare text to be displayed/previewed...
+// This function is here to save memory (this function is used by viewforum/viewtopic/posting... and to include another huge file is pure memory waste)
+function parse_text_display($text, $text_rules)
+{
+	global $bbcode, $user;
+
+	$text_flags = explode(':', $text_rules);
+
+	$allow_bbcode = (int) $text_flags[0] & 1;
+	$allow_smilies = (int) $text_flags[0] & 2;
+	$allow_magic_url = (int) $text_flags[0] & 4;
+
+	$bbcode_uid = trim($text_flags[1]);
+	$bbcode_bitfield = (int) $text_flags[2];
+
+	// Really, really process bbcode only if we have something to process...
+	if (!$bbcode && $allow_bbcode && strpos($text, '[') !== false)
+	{
+		global $phpbb_root_path, $phpEx;
+
+		include_once($phpbb_root_path . 'includes/bbcode.' . $phpEx);
+	//	$bbcode = new bbcode();
+	}
+
+	// Second parse bbcode here
+	if ($allow_bbcode)
+	{
+	//	$bbcode->bbcode_second_pass($text, $bbcode_uid, $bbcode_bitfield);
+	}
+
+	// If we allow users to disable display of emoticons we'll need an appropriate 
+	// check and preg_replace here
+	if ($allow_smilies)
+	{
+	//	$text = smilie_text($text, !$allow_smilies);
+	}
+
+	// Replace naughty words such as farty pants
+	$text = str_replace("\n", '<br />', ($text));
+
+	return $text;
+}
 
 //
 // Compatibility Funcs
@@ -422,4 +585,172 @@ function request_var($var_name, $default)
 	}
 }
 
+function markread($mode, $forum_id = 0, $topic_id = 0, $marktime = false)
+{
+	global $board_config, $db, $userdata;
+	
+	if ($userdata['user_id'] == ANONYMOUS)
+	{
+		return;
+	}
+
+	if (!is_array($forum_id))
+	{
+		$forum_id = array($forum_id);
+	}
+
+	// Default tracking type
+	$type = TRACK_NORMAL;
+	$current_time = ($marktime) ? $marktime : time();
+	$topic_id = (int) $topic_id;
+
+	switch ($mode)
+	{
+		case 'mark':
+			if ($board_config['load_db_lastread'])
+			{
+				$sql = 'SELECT forum_id 
+					FROM ' . FORUMS_TRACK_TABLE . ' 
+					WHERE user_id = ' . $userdata['user_id'] . '
+						AND forum_id IN (' . implode(', ', array_map('intval', $forum_id)) . ')';
+				$result = $db->sql_query($sql);
+				
+				$sql_update = array();
+				while ($row = $db->sql_fetchrow($result))
+				{
+					$sql_update[] = $row['forum_id'];
+				}
+				$db->sql_freeresult($result);
+
+				if (sizeof($sql_update))
+				{
+					$sql = 'UPDATE ' . FORUMS_TRACK_TABLE . "
+						SET mark_time = $current_time 
+						WHERE user_id = " . $userdata['user_id'] . '
+							AND forum_id IN (' . implode(', ', $sql_update) . ')';
+					$db->sql_query($sql);
+				}
+
+				if ($sql_insert = array_diff($forum_id, $sql_update))
+				{
+					foreach ($sql_insert as $forum_id)
+					{
+						$sql = '';
+						switch (SQL_LAYER)
+						{
+							case 'mysql':
+							case 'mysql4':
+								$sql .= (($sql != '') ? ', ' : '') . '(' . $userdata['user_id'] . ", $forum_id, $current_time)";
+								$sql = 'VALUES ' . $sql;
+								break;
+
+							case 'mssql':
+							case 'sqlite':
+								$sql .= (($sql != '') ? ' UNION ALL ' : '') . ' SELECT ' . $userdata['user_id'] . ", $forum_id, $current_time";
+								break;
+
+							default:
+								$sql = 'INSERT INTO ' . FORUMS_TRACK_TABLE . ' (user_id, forum_id, mark_time)
+									VALUES (' . $userdata['user_id'] . ", $forum_id, $current_time)";
+								$db->sql_query($sql);
+								$sql = '';
+						}
+
+						if ($sql)
+						{
+							$sql = 'INSERT INTO ' . FORUMS_TRACK_TABLE . " (user_id, forum_id, mark_time) $sql";
+							$db->sql_query($sql);
+						}
+					}
+				}
+				unset($sql_update);
+				unset($sql_insert);
+			}
+			else
+			{
+				$tracking = (isset($_COOKIE[$board_config['cookie_name'] . '_track'])) ? unserialize(stripslashes($_COOKIE[$board_config['cookie_name'] . '_track'])) : array();
+
+				foreach ($forum_id as $f_id)
+				{
+					unset($tracking[$f_id]);
+					$tracking[$f_id][0] = base_convert($current_time - $board_config['board_startdate'], 10, 36);
+				}
+
+				//$user->set_cookie('track', serialize($tracking), time() + 31536000);
+				unset($tracking);
+			}
+			break;
+
+		case 'post':
+			// Mark a topic as read and mark it as a topic where the user has made a post.
+			$type = TRACK_POSTED;
+
+		case 'topic':
+			$forum_id =	(int) $forum_id[0];
+	
+			// Mark a topic as read
+			if ($board_config['load_db_lastread'] || ($board_config['load_db_track'] && $type == TRACK_POSTED))
+			{
+				$sql = 'UPDATE ' . TOPICS_TRACK_TABLE . "
+					SET mark_type = $type, mark_time = $current_time
+					WHERE topic_id = $topic_id
+						AND user_id = " . $userdata['user_id'] . " 
+						AND mark_time < $current_time";
+				if (!$db->sql_query($sql) || !$db->sql_affectedrows())
+				{
+					$db->sql_return_on_error(true);
+
+					$sql = 'INSERT INTO ' . TOPICS_TRACK_TABLE . ' (user_id, topic_id, mark_type, mark_time)
+						VALUES (' . $userdata['user_id'] . ", $topic_id, $type, $current_time)";
+					$db->sql_query($sql);
+
+					$db->sql_return_on_error(false);
+				}
+			}
+
+			if (!$board_config['load_db_lastread'])
+			{
+				$tracking = array();
+				if (isset($_COOKIE[$board_config['cookie_name'] . '_track']))
+				{
+					$tracking = unserialize(stripslashes($_COOKIE[$board_config['cookie_name'] . '_track']));
+
+					// If the cookie grows larger than 2000 characters we will remove
+					// the smallest value
+					if (strlen($_COOKIE[$board_config['cookie_name'] . '_track']) > 2000)
+					{
+						foreach ($tracking as $f => $t_ary)
+						{
+							if (!isset($m_value) || min($t_ary) < $m_value)
+							{
+								$m_value = min($t_ary);
+								$m_tkey = array_search($m_value, $t_ary);
+								$m_fkey = $f;
+							}
+						}
+						unset($tracking[$m_fkey][$m_tkey]);
+					}
+				}
+
+				if (base_convert($tracking[$forum_id][0], 36, 10) < $current_time)
+				{
+					$tracking[$forum_id][base_convert($topic_id, 10, 36)] = base_convert($current_time - $board_config['board_startdate'], 10, 36);
+
+					//$user->set_cookie('track', serialize($tracking), time() + 31536000);
+				}
+				unset($tracking);
+			}
+			break;
+	}
+}
+function on_page($num_items, $per_page, $start)
+{
+	global $template, $lang;
+
+	$on_page = floor($start / $per_page) + 1;
+
+	$template->assign_var('ON_PAGE', $on_page);
+
+	return sprintf($lang['PAGE_OF'], $on_page, max(ceil($num_items / $per_page), 1));
+}
 ?>

@@ -6,7 +6,7 @@
  *   copyright            : ('C) 2001 The phpBB Group
  *   email                : support@phpbb.com
  *
- *   $Id: constants.php,v 1.1 2004/08/30 21:34:40 dmaj007 Exp $
+ *   $Id: constants.php,v 1.2 2004/09/01 16:44:29 dmaj007 Exp $
  *
  *
  ***************************************************************************/
@@ -145,7 +145,9 @@ define('AUTH_STICKY', 8);
 define('AUTH_POLLCREATE', 9);
 define('AUTH_VOTE', 10);
 define('AUTH_ATTACH', 11);
-
+// Lastread types
+define('TRACK_NORMAL', 0); // not used at the moment
+define('TRACK_POSTED', 1);
 
 // Table names
 define('AUTH_ACCESS_TABLE', $table_prefix.'auth_access');
