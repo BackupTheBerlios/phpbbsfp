@@ -6,7 +6,7 @@
  *   copyright            : (C) 2001 The phpBB Group
  *   email                : support@phpbb.com
  *
- *   $Id: common.php,v 1.1 2004/08/30 21:34:40 dmaj007 Exp $
+ *   $Id: common.php,v 1.2 2004/08/31 22:51:31 toonarmy Exp $
  *
  ***************************************************************************/
 
@@ -211,10 +211,12 @@ while ( $row = $db->sql_fetchrow($result) )
 	$board_config[$row['config_name']] = $row['config_value'];
 }
 
+/*
 if (file_exists('install') || file_exists('contrib'))
 {
 	message_die(GENERAL_MESSAGE, 'Please ensure both the install/ and contrib/ directories are deleted');
 }
+*/
 
 //
 // Show 'Board is disabled' message if needed.
