@@ -6,7 +6,7 @@
  *   copyright            : (C) 2001 The phpBB Group
  *   email                : support@phpbb.com
  *
- *   $Id: functions.php,v 1.1 2004/08/30 21:34:40 dmaj007 Exp $
+ *   $Id: functions.php,v 1.2 2004/09/02 00:01:40 dmaj007 Exp $
  *
  *
  ***************************************************************************/
@@ -212,7 +212,7 @@ function make_jumpbox($action, $match_forum_id = 0)
 
 //
 // Initialise user settings on page load
-function init_userprefs($userdata)
+/*function init_userprefs(&$userdata)
 {
 	global $board_config, $theme, $images;
 	global $template, $lang, $phpEx, $phpbb_root_path;
@@ -294,7 +294,7 @@ function init_userprefs($userdata)
 
 	return;
 }
-
+*/
 function setup_style($style)
 {
 	global $db, $board_config, $template, $images, $phpbb_root_path;
@@ -769,5 +769,104 @@ function redirect($url)
 	header('Location: ' . $server_protocol . $server_name . $server_port . $script_name . $url);
 	exit;
 }
+function set_config_arr ($config_names, $config_values, $is_dynamics = array())
+{
+    foreach ($config_names as $key => $config_name)
+    {
+        $is_dynamics[$key] = isset($is_dynamics[$key]) ? (intval($is_dynamics[$key]) ? 1 : 0) : 0;
 
+        if ( $sql = set_config($config_names[$key], $config_values[$key], $is_dynamics[$key]) )
+        {
+            return $sql; // Error
+        }
+    }
+    retrun;
+}
+
+function get_config_value($config_name)
+{
+    global $board_config;
+
+    $config_value = FALSE;
+
+    if (isset($board_config[$config_name]))
+    {
+        $config_value = $board_config[$config_name];
+
+    }
+    else
+    {
+        global $db;
+
+        $sql = 'SELECT config_value FROM ' . CONFIG_TABLE . " WHERE config_name = '" . $db->sql_escape($config_name) . "'";
+
+        if (!($result = $db->sql_query($sql)))
+        {
+            return FALSE;
+        }
+
+        if ($row = $db->sql_fetchrow($result))
+        {
+            $config_value = $row[$config_name];
+        }
+
+		$db->sql_freeresult($result);
+    }
+    return $config_value;
+}
+
+function set_config($config_name, $config_value, $is_dynamic = FALSE, $exists = NULL, $insert_only = FALSE)
+{
+    global $db, $cache, $board_config;
+
+    if ($exists === NULL)
+    {
+        $exists = get_config_value($config_name);
+    }
+
+    $done = FALSE;
+
+    if ($exists !== FALSE && $insert_only === FALSE)
+    {
+        $sql = 'UPDATE ' . CONFIG_TABLE . '
+            SET config_value = \'' . $db->sql_escape($config_value) . '\',
+            is_dynamic = \'' . ($is_dynamic ? 1 : 0) . '\'
+            WHERE config_name = \'' . $db->sql_escape($config_name) . '\'';
+
+        if (!$db->sql_query($sql))
+        {
+            return $sql;
+        }
+
+		$db->sql_freeresult();
+
+        $done = TRUE;
+    }
+    elseif ($exists === FALSE)
+    {
+        $sql = 'INSERT INTO ' . CONFIG_TABLE . ' 
+			(config_name, config_value, is_dynamic)
+            VALUES (\'' . $db->sql_escape($config_name) . '\', \'' . $db->sql_escape($config_value) . '\', \'' . ($is_dynamic ? 1 : 0) . '\')';
+
+        if (!$db->sql_query($sql))
+        {
+            return $sql;
+        }
+
+		$db->sql_freeresult();
+
+        $done = TRUE;
+    }
+
+    if ($done == TRUE)
+    {
+        $board_config[$config_name] = $config_value;
+
+        if (!$is_dynamic)
+        {
+            $cache->destroy('board_config');
+        }
+    }
+    return;
+}
 ?>

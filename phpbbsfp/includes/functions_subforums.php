@@ -1,10 +1,10 @@
 <?php
 
-// $Id: functions_subforums.php,v 1.4 2004/09/01 16:44:33 dmaj007 Exp $
+// $Id: functions_subforums.php,v 1.6 2004/09/02 00:04:18 dmaj007 Exp $
 
 function display_forums($root_data = '', $display_moderators = TRUE)
 {
-	global $board_config, $db, $template, $lang, $auth, $userdata, $phpEx, $forum_moderators, $phpbb_root_path;
+	global $board_config, $db, $template, $user, $auth, $phpEx, $forum_moderators, $phpbb_root_path, $user;
 
 	// Get posted/get info
 	$mark_read = request_var('mark', '');
@@ -25,7 +25,7 @@ function display_forums($root_data = '', $display_moderators = TRUE)
 	// Display list of active topics for this category?
 	$show_active = (isset($root_data['forum_flags']) && $root_data['forum_flags'] & 16) ? true : false;
 
-	if ($board_config['load_db_lastread'] && $userdata['user_id'] != ANONYMOUS)
+	if ($board_config['load_db_lastread'] && $user->data['user_id'] != ANONYMOUS)
 	{
 		switch (SQL_LAYER)
 		{
@@ -33,7 +33,7 @@ function display_forums($root_data = '', $display_moderators = TRUE)
 				break;
 
 			default:
-				$sql_from = '(' . FORUMS_TABLE . ' f LEFT JOIN ' . FORUMS_TRACK_TABLE . ' ft ON (ft.user_id = ' . $userdata['user_id'] . ' AND ft.forum_id = f.forum_id))';
+				$sql_from = '(' . FORUMS_TABLE . ' f LEFT JOIN ' . FORUMS_TRACK_TABLE . ' ft ON (ft.user_id = ' . $user->data['user_id'] . ' AND ft.forum_id = f.forum_id))';
 				break;
 		}
 		$lastread_select = ', ft.mark_time ';
@@ -57,7 +57,7 @@ print_r ($db->sql_error());
 
 	while ($row = $db->sql_fetchrow($result))
 	{
-		if ($mark_read == 'forums' && $userdata['user_id'] != ANONYMOUS)
+		if ($mark_read == 'forums' && $user->data['user_id'] != ANONYMOUS)
 		{
 			//if ($auth->acl_get('f_list', $row['forum_id']))
 			//{
@@ -148,7 +148,7 @@ print_r ($db->sql_error());
 
 		$mark_time_forum = ($board_config['load_db_lastread']) ? $row['mark_time'] : ((isset($tracking_topics[$forum_id][0])) ? base_convert($tracking_topics[$forum_id][0], 36, 10) + $board_config['board_startdate'] : 0);
 
-		if ($mark_time_forum < $row['forum_last_post_time'] && $userdata['user_id'] != ANONYMOUS)
+		if ($mark_time_forum < $row['forum_last_post_time'] && $user->data['user_id'] != ANONYMOUS)
 		{
 			$forum_unread[$parent_id] = true;
 		}
@@ -164,7 +164,7 @@ print_r ($db->sql_error());
 		meta_refresh(3, $redirect);
 
 		$message = (strstr($redirect, 'viewforum')) ? 'RETURN_FORUM' : 'RETURN_INDEX';
-		$message = $lang['FORUMS_MARKED'] . '<br /><br />' . sprintf($lang[$message], '<a href="' . $redirect . '">', '</a> ');
+		$message = $user->lang['FORUMS_MARKED'] . '<br /><br />' . sprintf($user->lang[$message], '<a href="' . $redirect . '">', '</a> ');
 		trigger_error($message);
 	}
 
@@ -230,7 +230,7 @@ print_r ($db->sql_error());
 					}
 					$subforums_list = implode(', ', $links);
 
-					$l_subforums = (count($subforums[$forum_id]) == 1) ? $lang['SUBFORUM'] . ': ' : $lang['SUBFORUMS'] . ': ';
+					$l_subforums = (count($subforums[$forum_id]) == 1) ? $user->lang['SUBFORUM'] . ': ' : $user->lang['SUBFORUMS'] . ': ';
 				}
 			}
 
@@ -271,7 +271,7 @@ print_r ($db->sql_error());
 		{
 			//$last_post_time = $user->format_date($row['forum_last_post_time']);
 
-			//$last_poster = ($row['forum_last_poster_name'] != '') ? $row['forum_last_poster_name'] : $lang['GUEST'];
+			//$last_poster = ($row['forum_last_poster_name'] != '') ? $row['forum_last_poster_name'] : $user->lang['GUEST'];
 			//$last_poster_url = ($row['forum_last_poster_id'] == ANONYMOUS) ? '' : "memberlist.$phpEx$SID&amp;mode=viewprofile&amp;u="  . $row['forum_last_poster_id'];
 
 			//$last_post_url = "viewtopic.$phpEx$SID&amp;f=" . $row['forum_id_last_post'] . '&amp;p=' . $row['forum_last_post_id'] . '#' . $row['forum_last_post_id'];
@@ -286,7 +286,7 @@ print_r ($db->sql_error());
 		$l_moderator = $moderators_list = '';
 		if ($display_moderators && !empty($forum_moderators[$forum_id]))
 		{
-			$l_moderator = (count($forum_moderators[$forum_id]) == 1) ? $lang['MODERATOR'] : $lang['MODERATORS'];
+			$l_moderator = (count($forum_moderators[$forum_id]) == 1) ? $user->lang['MODERATOR'] : $user->lang['MODERATORS'];
 			$moderators_list = implode(', ', $forum_moderators[$forum_id]);
 		}
 
@@ -322,10 +322,10 @@ print_r ($db->sql_error());
 
 	$template->assign_vars(array(
 		'U_MARK_FORUMS'		=> append_sid("viewforum.$phpEx?f=" . $root_data['forum_id'] . '&amp;mark=forums'), 
-
+		'L_LAST_POST' => $user->lang['Last_Post'],
 		'S_HAS_SUBFORUM'	=>	($visible_forums) ? true : false,
 
-		'L_SUBFORUM'		=>	($visible_forums == 1) ? $lang['SUBFORUM'] : $lang['SUBFORUMS'])
+		'L_SUBFORUM'		=>	($visible_forums == 1) ? $user->lang['SUBFORUM'] : $user->lang['SUBFORUMS'])
 	);
 
 	return $active_forum_ary;
@@ -376,9 +376,9 @@ function gen_forum_auth_level($mode, &$forum_id)
 
 	foreach ($rules as $rule)
 	{
-		/*$template->assign_block_vars('rules', array(
-			'RULE' => ($auth->acl_get('f_' . $rule, intval($forum_id))) ? $lang['RULES_' . strtoupper($rule) . '_CAN'] : $lang['RULES_' . strtoupper($rule) . '_CANNOT'])
-		);*/
+		$template->assign_block_vars('rules', array(
+			'RULE' => ($auth->acl_get('f_' . $rule, intval($forum_id))) ? $user->lang['RULES_' . strtoupper($rule) . '_CAN'] : $user->lang['RULES_' . strtoupper($rule) . '_CANNOT'])
+		);
 	}
 
 	return;
@@ -587,9 +587,9 @@ function request_var($var_name, $default)
 
 function markread($mode, $forum_id = 0, $topic_id = 0, $marktime = false)
 {
-	global $board_config, $db, $userdata;
+	global $board_config, $db, $user;
 	
-	if ($userdata['user_id'] == ANONYMOUS)
+	if ($user->data['user_id'] == ANONYMOUS)
 	{
 		return;
 	}
@@ -611,7 +611,7 @@ function markread($mode, $forum_id = 0, $topic_id = 0, $marktime = false)
 			{
 				$sql = 'SELECT forum_id 
 					FROM ' . FORUMS_TRACK_TABLE . ' 
-					WHERE user_id = ' . $userdata['user_id'] . '
+					WHERE user_id = ' . $user->data['user_id'] . '
 						AND forum_id IN (' . implode(', ', array_map('intval', $forum_id)) . ')';
 				$result = $db->sql_query($sql);
 				
@@ -626,7 +626,7 @@ function markread($mode, $forum_id = 0, $topic_id = 0, $marktime = false)
 				{
 					$sql = 'UPDATE ' . FORUMS_TRACK_TABLE . "
 						SET mark_time = $current_time 
-						WHERE user_id = " . $userdata['user_id'] . '
+						WHERE user_id = " . $user->data['user_id'] . '
 							AND forum_id IN (' . implode(', ', $sql_update) . ')';
 					$db->sql_query($sql);
 				}
@@ -640,18 +640,18 @@ function markread($mode, $forum_id = 0, $topic_id = 0, $marktime = false)
 						{
 							case 'mysql':
 							case 'mysql4':
-								$sql .= (($sql != '') ? ', ' : '') . '(' . $userdata['user_id'] . ", $forum_id, $current_time)";
+								$sql .= (($sql != '') ? ', ' : '') . '(' . $user->data['user_id'] . ", $forum_id, $current_time)";
 								$sql = 'VALUES ' . $sql;
 								break;
 
 							case 'mssql':
 							case 'sqlite':
-								$sql .= (($sql != '') ? ' UNION ALL ' : '') . ' SELECT ' . $userdata['user_id'] . ", $forum_id, $current_time";
+								$sql .= (($sql != '') ? ' UNION ALL ' : '') . ' SELECT ' . $user->data['user_id'] . ", $forum_id, $current_time";
 								break;
 
 							default:
 								$sql = 'INSERT INTO ' . FORUMS_TRACK_TABLE . ' (user_id, forum_id, mark_time)
-									VALUES (' . $userdata['user_id'] . ", $forum_id, $current_time)";
+									VALUES (' . $user->data['user_id'] . ", $forum_id, $current_time)";
 								$db->sql_query($sql);
 								$sql = '';
 						}
@@ -694,14 +694,14 @@ function markread($mode, $forum_id = 0, $topic_id = 0, $marktime = false)
 				$sql = 'UPDATE ' . TOPICS_TRACK_TABLE . "
 					SET mark_type = $type, mark_time = $current_time
 					WHERE topic_id = $topic_id
-						AND user_id = " . $userdata['user_id'] . " 
+						AND user_id = " . $user->data['user_id'] . " 
 						AND mark_time < $current_time";
 				if (!$db->sql_query($sql) || !$db->sql_affectedrows())
 				{
 					$db->sql_return_on_error(true);
 
 					$sql = 'INSERT INTO ' . TOPICS_TRACK_TABLE . ' (user_id, topic_id, mark_type, mark_time)
-						VALUES (' . $userdata['user_id'] . ", $topic_id, $type, $current_time)";
+						VALUES (' . $user->data['user_id'] . ", $topic_id, $type, $current_time)";
 					$db->sql_query($sql);
 
 					$db->sql_return_on_error(false);
@@ -736,7 +736,7 @@ function markread($mode, $forum_id = 0, $topic_id = 0, $marktime = false)
 				{
 					$tracking[$forum_id][base_convert($topic_id, 10, 36)] = base_convert($current_time - $board_config['board_startdate'], 10, 36);
 
-					//$user->set_cookie('track', serialize($tracking), time() + 31536000);
+					$user->set_cookie('track', serialize($tracking), time() + 31536000);
 				}
 				unset($tracking);
 			}
@@ -745,12 +745,46 @@ function markread($mode, $forum_id = 0, $topic_id = 0, $marktime = false)
 }
 function on_page($num_items, $per_page, $start)
 {
-	global $template, $lang;
+	global $template, $user;
 
 	$on_page = floor($start / $per_page) + 1;
 
 	$template->assign_var('ON_PAGE', $on_page);
 
-	return sprintf($lang['PAGE_OF'], $on_page, max(ceil($num_items / $per_page), 1));
+	return sprintf($user->lang['PAGE_OF'], $on_page, max(ceil($num_items / $per_page), 1));
+}
+function gen_sort_selects(&$limit_days, &$sort_by_text, &$sort_days, &$sort_key, &$sort_dir, &$s_limit_days, &$s_sort_key, &$s_sort_dir, &$u_sort_param)
+{
+	global $user;
+
+	$sort_dir_text = array('a' => $user->lang['ASCENDING'], 'd' => $user->lang['DESCENDING']);
+
+	$s_limit_days = '<select name="st">';
+	foreach ($limit_days as $day => $text)
+	{
+		$selected = ($sort_days == $day) ? ' selected="selected"' : '';
+		$s_limit_days .= '<option value="' . $day . '"' . $selected . '>' . $text . '</option>';
+	}
+	$s_limit_days .= '</select>';
+
+	$s_sort_key = '<select name="sk">';
+	foreach ($sort_by_text as $key => $text)
+	{
+		$selected = ($sort_key == $key) ? ' selected="selected"' : '';
+		$s_sort_key .= '<option value="' . $key . '"' . $selected . '>' . $text . '</option>';
+	}
+	$s_sort_key .= '</select>';
+
+	$s_sort_dir = '<select name="sd">';
+	foreach ($sort_dir_text as $key => $value)
+	{
+		$selected = ($sort_dir == $key) ? ' selected="selected"' : '';
+		$s_sort_dir .= '<option value="' . $key . '"' . $selected . '>' . $value . '</option>';
+	}
+	$s_sort_dir .= '</select>';
+
+	$u_sort_param = "st=$sort_days&amp;sk=$sort_key&amp;sd=$sort_dir";
+
+	return;
 }
 ?>

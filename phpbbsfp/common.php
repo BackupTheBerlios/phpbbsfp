@@ -6,7 +6,7 @@
  *   copyright            : (C) 2001 The phpBB Group
  *   email                : support@phpbb.com
  *
- *   $Id: common.php,v 1.2 2004/08/31 22:51:31 toonarmy Exp $
+ *   $Id: common.php,v 1.3 2004/09/02 00:01:40 dmaj007 Exp $
  *
  ***************************************************************************/
 
@@ -182,6 +182,7 @@ include($phpbb_root_path . 'includes/sessions.'.$phpEx);
 include($phpbb_root_path . 'includes/auth.'.$phpEx);
 include($phpbb_root_path . 'includes/functions.'.$phpEx);
 include($phpbb_root_path . 'includes/db.'.$phpEx);
+$auth = new auth();
 
 //
 // Obtain and encode users IP

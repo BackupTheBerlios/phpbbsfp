@@ -6,7 +6,7 @@
  *   copyright            : (C) 2001 The phpBB Group
  *   email                : support@phpbb.com
  *
- *   $Id: page_header.php,v 1.1 2004/08/30 21:34:40 dmaj007 Exp $
+ *   $Id: page_header.php,v 1.2 2004/09/02 00:01:41 dmaj007 Exp $
  *
  *
  ***************************************************************************/
@@ -70,18 +70,18 @@ $template->set_filenames(array(
 //
 // Generate logged in/logged out status
 //
-if ( $userdata['session_logged_in'] )
+if ( $user->data['session_logged_in'] )
 {
-	$u_login_logout = 'login.'.$phpEx.'?logout=true&amp;sid=' . $userdata['session_id'];
-	$l_login_logout = $lang['Logout'] . ' [ ' . $userdata['username'] . ' ]';
+	$u_login_logout = 'login.'.$phpEx.'?logout=true&amp;sid=' . $user->data['session_id'];
+	$l_login_logout = $user->lang['Logout'] . ' [ ' . $user->data['username'] . ' ]';
 }
 else
 {
 	$u_login_logout = 'login.'.$phpEx;
-	$l_login_logout = $lang['Login'];
+	$l_login_logout = $user->lang['Login'];
 }
 
-$s_last_visit = ( $userdata['session_logged_in'] ) ? create_date($board_config['default_dateformat'], $userdata['user_lastvisit'], $board_config['board_timezone']) : '';
+$s_last_visit = ( $user->data['session_logged_in'] ) ? create_date($board_config['default_dateformat'], $user->data['user_lastvisit'], $board_config['board_timezone']) : '';
 
 //
 // Get basic (usernames + totals) online
@@ -145,7 +145,7 @@ if (defined('SHOW_ONLINE'))
 					$logged_hidden_online++;
 				}
 
-				if ( $row['user_allow_viewonline'] || $userdata['user_level'] == ADMIN )
+				if ( $row['user_allow_viewonline'] || $user->data['user_level'] == ADMIN )
 				{
 					$online_userlist .= ( $online_userlist != '' ) ? ', ' . $user_online_link : $user_online_link;
 				}
@@ -168,9 +168,9 @@ if (defined('SHOW_ONLINE'))
 
 	if ( empty($online_userlist) )
 	{
-		$online_userlist = $lang['None'];
+		$online_userlist = $user->lang['None'];
 	}
-	$online_userlist = ( ( isset($forum_id) ) ? $lang['Browsing_forum'] : $lang['Registered_users'] ) . ' ' . $online_userlist;
+	$online_userlist = ( ( isset($forum_id) ) ? $user->lang['Browsing_forum'] : $user->lang['Registered_users'] ) . ' ' . $online_userlist;
 
 	$total_online_users = $logged_visible_online + $logged_hidden_online + $guests_online;
 
@@ -198,54 +198,54 @@ if (defined('SHOW_ONLINE'))
 
 	if ( $total_online_users == 0 )
 	{
-		$l_t_user_s = $lang['Online_users_zero_total'];
+		$l_t_user_s = $user->lang['Online_users_zero_total'];
 	}
 	else if ( $total_online_users == 1 )
 	{
-		$l_t_user_s = $lang['Online_user_total'];
+		$l_t_user_s = $user->lang['Online_user_total'];
 	}
 	else
 	{
-		$l_t_user_s = $lang['Online_users_total'];
+		$l_t_user_s = $user->lang['Online_users_total'];
 	}
 
 	if ( $logged_visible_online == 0 )
 	{
-		$l_r_user_s = $lang['Reg_users_zero_total'];
+		$l_r_user_s = $user->lang['Reg_users_zero_total'];
 	}
 	else if ( $logged_visible_online == 1 )
 	{
-		$l_r_user_s = $lang['Reg_user_total'];
+		$l_r_user_s = $user->lang['Reg_user_total'];
 	}
 	else
 	{
-		$l_r_user_s = $lang['Reg_users_total'];
+		$l_r_user_s = $user->lang['Reg_users_total'];
 	}
 
 	if ( $logged_hidden_online == 0 )
 	{
-		$l_h_user_s = $lang['Hidden_users_zero_total'];
+		$l_h_user_s = $user->lang['Hidden_users_zero_total'];
 	}
 	else if ( $logged_hidden_online == 1 )
 	{
-		$l_h_user_s = $lang['Hidden_user_total'];
+		$l_h_user_s = $user->lang['Hidden_user_total'];
 	}
 	else
 	{
-		$l_h_user_s = $lang['Hidden_users_total'];
+		$l_h_user_s = $user->lang['Hidden_users_total'];
 	}
 
 	if ( $guests_online == 0 )
 	{
-		$l_g_user_s = $lang['Guest_users_zero_total'];
+		$l_g_user_s = $user->lang['Guest_users_zero_total'];
 	}
 	else if ( $guests_online == 1 )
 	{
-		$l_g_user_s = $lang['Guest_user_total'];
+		$l_g_user_s = $user->lang['Guest_user_total'];
 	}
 	else
 	{
-		$l_g_user_s = $lang['Guest_users_total'];
+		$l_g_user_s = $user->lang['Guest_users_total'];
 	}
 
 	$l_online_users = sprintf($l_t_user_s, $total_online_users);
@@ -258,18 +258,18 @@ if (defined('SHOW_ONLINE'))
 // Obtain number of new private messages
 // if user is logged in
 //
-if ( ($userdata['session_logged_in']) && (empty($gen_simple_header)) )
+if ( ($user->data['session_logged_in']) && (empty($gen_simple_header)) )
 {
-	if ( $userdata['user_new_privmsg'] )
+	if ( $user->data['user_new_privmsg'] )
 	{
-		$l_message_new = ( $userdata['user_new_privmsg'] == 1 ) ? $lang['New_pm'] : $lang['New_pms'];
-		$l_privmsgs_text = sprintf($l_message_new, $userdata['user_new_privmsg']);
+		$l_message_new = ( $user->data['user_new_privmsg'] == 1 ) ? $user->lang['New_pm'] : $user->lang['New_pms'];
+		$l_privmsgs_text = sprintf($l_message_new, $user->data['user_new_privmsg']);
 
-		if ( $userdata['user_last_privmsg'] > $userdata['user_lastvisit'] )
+		if ( $user->data['user_last_privmsg'] > $user->data['user_lastvisit'] )
 		{
 			$sql = "UPDATE " . USERS_TABLE . "
-				SET user_last_privmsg = " . $userdata['user_lastvisit'] . "
-				WHERE user_id = " . $userdata['user_id'];
+				SET user_last_privmsg = " . $user->data['user_lastvisit'] . "
+				WHERE user_id = " . $user->data['user_id'];
 			if ( !$db->sql_query($sql) )
 			{
 				message_die(GENERAL_ERROR, 'Could not update private message new/read time for user', '', __LINE__, __FILE__, $sql);
@@ -286,26 +286,26 @@ if ( ($userdata['session_logged_in']) && (empty($gen_simple_header)) )
 	}
 	else
 	{
-		$l_privmsgs_text = $lang['No_new_pm'];
+		$l_privmsgs_text = $user->lang['No_new_pm'];
 
 		$s_privmsg_new = 0;
 		$icon_pm = $images['pm_no_new_msg'];
 	}
 
-	if ( $userdata['user_unread_privmsg'] )
+	if ( $user->data['user_unread_privmsg'] )
 	{
-		$l_message_unread = ( $userdata['user_unread_privmsg'] == 1 ) ? $lang['Unread_pm'] : $lang['Unread_pms'];
-		$l_privmsgs_text_unread = sprintf($l_message_unread, $userdata['user_unread_privmsg']);
+		$l_message_unread = ( $user->data['user_unread_privmsg'] == 1 ) ? $user->lang['Unread_pm'] : $user->lang['Unread_pms'];
+		$l_privmsgs_text_unread = sprintf($l_message_unread, $user->data['user_unread_privmsg']);
 	}
 	else
 	{
-		$l_privmsgs_text_unread = $lang['No_unread_pm'];
+		$l_privmsgs_text_unread = $user->lang['No_unread_pm'];
 	}
 }
 else
 {
 	$icon_pm = $images['pm_no_new_msg'];
-	$l_privmsgs_text = $lang['Login_check_pm'];
+	$l_privmsgs_text = $user->lang['Login_check_pm'];
 	$l_privmsgs_text_unread = '';
 	$s_privmsg_new = 0;
 }
@@ -338,7 +338,7 @@ while( list($nav_item, $nav_array) = @each($nav_links) )
 
 // Format Timezone. We are unable to use array_pop here, because of PHP3 compatibility
 $l_timezone = explode('.', $board_config['board_timezone']);
-$l_timezone = (count($l_timezone) > 1 && $l_timezone[count($l_timezone)-1] != 0) ? $lang[sprintf('%.1f', $board_config['board_timezone'])] : $lang[number_format($board_config['board_timezone'])];
+$l_timezone = (count($l_timezone) > 1 && $l_timezone[count($l_timezone)-1] != 0) ? $user->lang[sprintf('%.1f', $board_config['board_timezone'])] : $user->lang[number_format($board_config['board_timezone'])];
 //
 // The following assigns all _common_ variables that may be used at any point
 // in a template.
@@ -347,37 +347,37 @@ $template->assign_vars(array(
 	'SITENAME' => $board_config['sitename'],
 	'SITE_DESCRIPTION' => $board_config['site_desc'],
 	'PAGE_TITLE' => $page_title,
-	'LAST_VISIT_DATE' => sprintf($lang['You_last_visit'], $s_last_visit),
-	'CURRENT_TIME' => sprintf($lang['Current_time'], create_date($board_config['default_dateformat'], time(), $board_config['board_timezone'])),
+	'LAST_VISIT_DATE' => sprintf($user->lang['You_last_visit'], $s_last_visit),
+	'CURRENT_TIME' => sprintf($user->lang['Current_time'], create_date($board_config['default_dateformat'], time(), $board_config['board_timezone'])),
 	'TOTAL_USERS_ONLINE' => $l_online_users,
 	'LOGGED_IN_USER_LIST' => $online_userlist,
-	'RECORD_USERS' => sprintf($lang['Record_online_users'], $board_config['record_online_users'], create_date($board_config['default_dateformat'], $board_config['record_online_date'], $board_config['board_timezone'])),
+	'RECORD_USERS' => sprintf($user->lang['Record_online_users'], $board_config['record_online_users'], create_date($board_config['default_dateformat'], $board_config['record_online_date'], $board_config['board_timezone'])),
 	'PRIVATE_MESSAGE_INFO' => $l_privmsgs_text,
 	'PRIVATE_MESSAGE_INFO_UNREAD' => $l_privmsgs_text_unread,
 	'PRIVATE_MESSAGE_NEW_FLAG' => $s_privmsg_new,
 
 	'PRIVMSG_IMG' => $icon_pm,
 
-	'L_USERNAME' => $lang['Username'],
-	'L_PASSWORD' => $lang['Password'],
+	'L_USERNAME' => $user->lang['Username'],
+	'L_PASSWORD' => $user->lang['Password'],
 	'L_LOGIN_LOGOUT' => $l_login_logout,
-	'L_LOGIN' => $lang['Login'],
-	'L_LOG_ME_IN' => $lang['Log_me_in'],
-	'L_AUTO_LOGIN' => $lang['Log_me_in'],
-	'L_INDEX' => sprintf($lang['Forum_Index'], $board_config['sitename']),
-	'L_REGISTER' => $lang['Register'],
-	'L_PROFILE' => $lang['Profile'],
-	'L_SEARCH' => $lang['Search'],
-	'L_PRIVATEMSGS' => $lang['Private_Messages'],
-	'L_WHO_IS_ONLINE' => $lang['Who_is_Online'],
-	'L_MEMBERLIST' => $lang['Memberlist'],
-	'L_FAQ' => $lang['FAQ'],
-	'L_USERGROUPS' => $lang['Usergroups'],
-	'L_SEARCH_NEW' => $lang['Search_new'],
-	'L_SEARCH_UNANSWERED' => $lang['Search_unanswered'],
-	'L_SEARCH_SELF' => $lang['Search_your_posts'],
-	'L_WHOSONLINE_ADMIN' => sprintf($lang['Admin_online_color'], '<span style="color:#' . $theme['fontcolor3'] . '">', '</span>'),
-	'L_WHOSONLINE_MOD' => sprintf($lang['Mod_online_color'], '<span style="color:#' . $theme['fontcolor2'] . '">', '</span>'),
+	'L_LOGIN' => $user->lang['Login'],
+	'L_LOG_ME_IN' => $user->lang['Log_me_in'],
+	'L_AUTO_LOGIN' => $user->lang['Log_me_in'],
+	'L_INDEX' => sprintf($user->lang['Forum_Index'], $board_config['sitename']),
+	'L_REGISTER' => $user->lang['Register'],
+	'L_PROFILE' => $user->lang['Profile'],
+	'L_SEARCH' => $user->lang['Search'],
+	'L_PRIVATEMSGS' => $user->lang['Private_Messages'],
+	'L_WHO_IS_ONLINE' => $user->lang['Who_is_Online'],
+	'L_MEMBERLIST' => $user->lang['Memberlist'],
+	'L_FAQ' => $user->lang['FAQ'],
+	'L_USERGROUPS' => $user->lang['Usergroups'],
+	'L_SEARCH_NEW' => $user->lang['Search_new'],
+	'L_SEARCH_UNANSWERED' => $user->lang['Search_unanswered'],
+	'L_SEARCH_SELF' => $user->lang['Search_your_posts'],
+	'L_WHOSONLINE_ADMIN' => sprintf($user->lang['Admin_online_color'], '<span style="color:#' . $theme['fontcolor3'] . '">', '</span>'),
+	'L_WHOSONLINE_MOD' => sprintf($user->lang['Mod_online_color'], '<span style="color:#' . $theme['fontcolor2'] . '">', '</span>'),
 
 	'U_SEARCH_UNANSWERED' => append_sid('search.'.$phpEx.'?search_id=unanswered'),
 	'U_SEARCH_SELF' => append_sid('search.'.$phpEx.'?search_id=egosearch'),
@@ -395,11 +395,11 @@ $template->assign_vars(array(
 	'U_LOGIN_LOGOUT' => append_sid($u_login_logout),
 	'U_GROUP_CP' => append_sid('groupcp.'.$phpEx),
 
-	'S_CONTENT_DIRECTION' => $lang['DIRECTION'],
-	'S_CONTENT_ENCODING' => $lang['ENCODING'],
-	'S_CONTENT_DIR_LEFT' => $lang['LEFT'],
-	'S_CONTENT_DIR_RIGHT' => $lang['RIGHT'],
-	'S_TIMEZONE' => sprintf($lang['All_times'], $l_timezone),
+	'S_CONTENT_DIRECTION' => $user->lang['DIRECTION'],
+	'S_CONTENT_ENCODING' => $user->lang['ENCODING'],
+	'S_CONTENT_DIR_LEFT' => $user->lang['LEFT'],
+	'S_CONTENT_DIR_RIGHT' => $user->lang['RIGHT'],
+	'S_TIMEZONE' => sprintf($user->lang['All_times'], $l_timezone),
 	'S_LOGIN_ACTION' => append_sid('login.'.$phpEx),
 
 	'T_HEAD_STYLESHEET' => $theme['head_stylesheet'],
@@ -447,7 +447,7 @@ $template->assign_vars(array(
 //
 // Login box?
 //
-if ( !$userdata['session_logged_in'] )
+if ( !$user->data['session_logged_in'] )
 {
 	$template->assign_block_vars('switch_user_logged_out', array());
 }
@@ -455,7 +455,7 @@ else
 {
 	$template->assign_block_vars('switch_user_logged_in', array());
 
-	if ( !empty($userdata['user_popup_pm']) )
+	if ( !empty($user->data['user_popup_pm']) )
 	{
 		$template->assign_block_vars('switch_enable_pm_popup', array());
 	}

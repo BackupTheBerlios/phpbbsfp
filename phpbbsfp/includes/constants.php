@@ -6,7 +6,7 @@
  *   copyright            : ('C) 2001 The phpBB Group
  *   email                : support@phpbb.com
  *
- *   $Id: constants.php,v 1.2 2004/09/01 16:44:29 dmaj007 Exp $
+ *   $Id: constants.php,v 1.3 2004/09/02 00:01:40 dmaj007 Exp $
  *
  *
  ***************************************************************************/
@@ -38,7 +38,13 @@ define('USER', 0);
 define('ADMIN', 1);
 define('MOD', 2);
 
-
+// Forum/Topic states
+define('FORUM_CAT', 0);
+define('FORUM_POST', 1);
+define('FORUM_LINK', 2);
+define('ITEM_UNLOCKED', 0);
+define('ITEM_LOCKED', 1);
+define('ITEM_MOVED', 2);
 // User related
 define('USER_ACTIVATION_NONE', 0);
 define('USER_ACTIVATION_SELF', 1);

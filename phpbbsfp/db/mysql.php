@@ -6,7 +6,7 @@
  *   copyright            : (C) 2001 The phpBB Group
  *   email                : support@phpbb.com
  *
- *   $Id: mysql.php,v 1.1 2004/08/30 21:34:40 dmaj007 Exp $
+ *   $Id: mysql.php,v 1.2 2004/09/02 00:01:40 dmaj007 Exp $
  *
  ***************************************************************************/
 
@@ -327,7 +327,86 @@ class sql_db
 
 		return $result;
 	}
+	function sql_escape($msg)
+	{
+		return mysql_escape_string($msg);
+	}
+	// Idea for this from Ikonboard
+	function sql_build_array($query, $assoc_ary = false, $and_or = 'AND')
+	{
+		if (!is_array($assoc_ary))
+		{
+			return false;
+		}
 
+		$fields = array();
+		$values = array();
+		if ($query == 'INSERT')
+		{
+			foreach ($assoc_ary as $key => $var)
+			{
+				$fields[] = $key;
+
+				if (is_null($var))
+				{
+					$values[] = 'NULL';
+				}
+				elseif (is_string($var))
+				{
+					$values[] = "'" . $this->sql_escape($var) . "'";
+				}
+				else
+				{
+					$values[] = (is_bool($var)) ? intval($var) : $var;
+				}
+			}
+
+			$query = ' (' . implode(', ', $fields) . ') VALUES (' . implode(', ', $values) . ')';
+		}
+		else if ($query == 'UPDATE' || $query == 'SELECT')
+		{
+			$values = array();
+			foreach ($assoc_ary as $key => $var)
+			{
+				if (is_null($var))
+				{
+					$values[] = "$key = NULL";
+				}
+				elseif (is_string($var))
+				{
+					$values[] = "$key = '" . $this->sql_escape($var) . "'";
+				}
+				else
+				{
+					$values[] = (is_bool($var)) ? "$key = " . intval($var) : "$key = $var";
+				}
+			}
+			$query = implode(($query == 'UPDATE') ? ', ' : ' ' . $and_or . ' ', $values);
+		}
+
+		return $query;
+	}
+	function sql_query_limit($query, $total, $offset = 0, $cache_ttl = 0) 
+	{ 
+		if ($query != '') 
+		{
+			$this->query_result = false; 
+
+			// if $total is set to 0 we do not want to limit the number of rows
+			if ($total == 0)
+			{
+				$total = -1;
+			}
+
+			$query .= "\n LIMIT " . ((!empty($offset)) ? $offset . ', ' . $total : $total);
+
+			return $this->sql_query($query, $cache_ttl); 
+		} 
+		else 
+		{ 
+			return false; 
+		} 
+	}
 } // class sql_db
 
 } // if ... define

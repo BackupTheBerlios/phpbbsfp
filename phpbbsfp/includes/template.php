@@ -2126,21 +2126,21 @@ var $block_else_level = array();
 		{
 			$var = substr($var, 2);
 			// check variable as it is
-			global $lang;
-			if(isset($lang[$var]))
+			global $user;
+			if(isset($user->lang[$var]))
 			{
-				return $lang[$var];
+				return $user->lang[$var];
 			}
 			// check variable in lower case
-			if(isset($lang[strtolower($var)]))
+			if(isset($user->lang[strtolower($var)]))
 			{
-				return $lang[strtolower($var)];
+				return $user->lang[strtolower($var)];
 			}
 			// check variable with first letter in upper case
 			$str = ucfirst(strtolower($var));
-			if(isset($lang[$str]))
+			if(isset($user->lang[$str]))
 			{
-				return $lang[$str];
+				return $user->lang[$str];
 			}
 			return ''; //str_replace('_', ' ', $var);
 		}
