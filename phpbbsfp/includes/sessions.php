@@ -1,7 +1,7 @@
 <?php
 //--------------------------------------------------------------------------------------------------
 //
-// $Id: sessions.php,v 1.2 2004/09/02 00:01:41 dmaj007 Exp $
+// $Id: sessions.php,v 1.3 2004/09/02 04:29:51 dmaj007 Exp $
 //
 // FILENAME  : sessions.php
 // STARTED   : Tue Jan 1, 2004
@@ -943,10 +943,6 @@ class user extends session
 		$template_path = 'templates/' ;
 		$template_name = $row['template_name'] ;
 
-		if(defined('IN_ADMIN'))
-		{
-			$template_name = 'admin';
-		}
 		$template = new Template($phpbb_root_path . $template_path . $template_name);
 	
 		if ( $template )
@@ -1076,9 +1072,27 @@ class user extends session
 		return strtr(@gmdate($format, $gmepoch + $this->timezone + $this->dst), $lang_dates);
 	}
 
-	function img($img, $alt = '', $width = false, $suffix = '')
+	function img($img, $alt = '', $width = false, $suffix = '', $border = 0)
 	{
-		// Should We add this? I think so :)
+		static $imgs;
+		global $phpbb_root_path, $template, $images;
+		if (empty($imgs[$img . $suffix]) || $width)
+		{
+
+			if ($suffix !== '')
+			{
+				$imgsrc = str_replace('{SUFFIX}', $suffix, $imgsrc);
+			}
+
+			$imgsrc = '"' . $images[$img] . '"';
+			$width = ($width) ? ' width="' . $width . '"' : '';
+			$height = ($height) ? ' height="' . $height . '"' : '';
+			$alt = (!empty($this->lang[$alt])) ? $this->lang[$alt] : $alt;
+
+			$imgs[$img . $suffix] = '<img src=' . $imgsrc . $width . $height . ' alt="' . $alt . '" title="' . $alt . '" name="' . $img . '" border="' . $border .'" />';
+		}
+
+		return $imgs[$img . $suffix];
 	}
 }
 
@@ -1093,44 +1107,11 @@ $GLOBALS['lang'] =& $user->lang; // Backwards Compat. with $lang
 //
 function append_sid($url, $non_html_amp = false)
 {
-	global $SID, $phpEx;
-	global $phpbb_root_path, $mvModules, $mvModuleName;
-	$matches = array();
-
-	$amp = ( $non_html_amp ) ? '&' : '&amp;';
-
-	if ( preg_match("~((admin)?[^\/\?&]*)\.$phpEx(?:[\?&]([^<>\s]*))?$~i", $url, $matches) )
-	{
-		// $matches[1] = "admin_file"
-		// $matches[2] = "admin"
-		// $matches[3] = "mode=view&f=5"
-
-		if ( isset($matches[2]) && !empty($matches[2]) ) // Admin
-		{
-			foreach ($mvModules as $name => $value)
-			{
-				if ( $value['state'] != 1 && $value['state'] != 5 )
-				{
-					continue;
-				}
-
-				if ( in_array("$matches[1].$phpEx", $value['admin']) )
-				{
-					$url = $phpbb_root_path . "admin/index.$phpEx?module=$name$ampfile=$matches[1]" . (!empty($matches[3])	? "$amp$matches[3]" : '');
-					break;
-				}
-			}
-
-		}
-		else if ($mvModuleName != '' && in_array("$matches[1].$phpEx", $mvModules[$mvModuleName]['files']))
-		{
-			$url = $phpbb_root_path . "index.$phpEx?module=$mvModuleName" . $amp . "file=$matches[1]" . (!empty($matches[3]) ? "$amp$matches[3]" : '');
-		}
-	}
+	global $SID;
 
 	if ( !empty($SID) && !preg_match('#sid=#', $url) )
 	{
-		$url .= ( ( strpos($url, '?') != false ) ? $amp  : '?' ) . $SID;
+		$url .= ( ( strpos($url, '?') != false ) ?  ( ( $non_html_amp ) ? '&' : '&amp;' ) : '?' ) . $SID;
 	}
 
 	return $url;
