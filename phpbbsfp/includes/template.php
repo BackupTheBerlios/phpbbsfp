@@ -154,14 +154,14 @@ class Template {
 	// format:
 	//  array(start_tag, end_tag)
 	var $bugs = array(
-		// ezportal typo:
+/*		// ezportal typo:
 		array('fetchpost_row', 'fetch_post_row'),
 		// mycalendar 2.2.7 typos:
 		array('date_cell', 'date_cells'),
 		array('date_row', 'date_rows'),
 		// history mod typo:
 		array('site_today', 'site_week'),
-		);
+*/		);
 
 	/**
 	 * Constructor. Installs XS mod on first run or updates it and sets the root dir.
@@ -294,7 +294,7 @@ class Template {
 		$this->set_rootdir($root);
 		if(!empty($this->tpl))
 		{
-			$this->load_replacements($this->tpldir . $this->tpl . '/xs.cfg');
+			//$this->load_replacements($this->tpldir . $this->tpl . '/xs.cfg');
 		}
 		if($old_root !== $this->root)
 		{
@@ -1068,7 +1068,7 @@ class Template {
 	 */
 	function assign_block_vars($blockname, $vararray)
 	{
-		if (strstr($blockname, '.'))
+		if (strpos($blockname, '.') !== false)
 		{
 			// Nested block.
 			$blocks = explode('.', $blockname);
@@ -1082,7 +1082,8 @@ class Template {
 			} 
 			// Now we add the block that we're actually assigning to. 
 			// We're adding a new iteration to this block with the given 
-			//	variable assignments. 
+			// variable assignments.
+			$vararray['S_ROW_COUNT'] = (isset($str[$blocks[$blockcount].'.'])) ? sizeof($str[$blocks[$blockcount].'.']) : '';
 			$str[$blocks[$blockcount].'.'][] = $vararray;
 		}
 		else
@@ -1090,6 +1091,7 @@ class Template {
 			// Top-level block.
 			// Add a new iteration to this block with the variable assignments
 			// we were given.
+			$vararray['S_ROW_COUNT'] = (isset($this->_tpldata[$blockname.'.'])) ? sizeof($this->_tpldata[$blockname.'.']) : '';
 			$this->_tpldata[$blockname.'.'][] = $vararray;
 		}
 
@@ -1147,7 +1149,7 @@ class Template {
 
 		$filename = $this->files[$handle];
 
-		$str = implode('', @file($filename));
+		$str = @file_get_contents($filename);
 		if (empty($str))
 		{
 			die("Template->loadfile(): File $filename for handle $handle is empty");
@@ -1246,7 +1248,7 @@ class Template {
 		// load code from file
 		if(!$code && !empty($filename))
 		{
-			$code = @implode('', @file($filename));
+			$code = @file_get_contents($filename);
 		}
 
 		// Replace phpBB 2.2 <!-- (END)PHP --> tags
@@ -1486,10 +1488,12 @@ class Template {
 				{
 					$block_items[$var] = 1;
 				}
+				$line = '<'."?php\n\n";
+				$lines = "\n" . 'for ($'. $var. '_i = 0; $'. $var. '_i < $'. $var. '_count; $'. $var. '_i++)';
+				$lines .= "\n". '{'. "\n";
 				if ($block_nesting_level < 2)
 				{
 					// Block is not nested.
-					$line = '<'."?php\n\n";
 					if($use_isset)
 					{
 						$line .= '$'. $var. '_count = ( isset($this->_tpldata[\''. $var. '.\']) ) ?  sizeof($this->_tpldata[\''. $var. '.\']) : 0;';
@@ -1498,12 +1502,8 @@ class Template {
 					{
 						$line .= '$'. $var. '_count = sizeof($this->_tpldata[\''. $var. '.\']);';
 					}
-					$line .= "\n" . 'for ($'. $var. '_i = 0; $'. $var. '_i < $'. $var. '_count; $'. $var. '_i++)';
-					$line .= "\n". '{'. "\n";
+					$line .= $lines;
 					$line .= ' $'. $var. '_item = &$this->_tpldata[\''. $var. '.\'][$'. $var. '_i];'."\n";
-					$line .= " \${$var}_item['S_ROW_COUNT'] = \${$var}_i;\n";
-					$line .= " \${$var}_item['S_NUM_ROWS'] = \${$var}_count;\n";
-					$line .= "\n?".">";
 				}
 				else
 				{
@@ -1516,7 +1516,6 @@ class Template {
 					// current indices of all parent blocks.
 					$varref = $this->generate_block_data_ref($namespace, false);
 					// Create the for loop code to iterate over this block.
-					$line = '<'."?php\n\n";
 					if($use_isset)
 					{
 						$line .= '$'. $var. '_count = ( isset('. $varref. ') ) ? sizeof('. $varref. ') : 0;';
@@ -1525,13 +1524,11 @@ class Template {
 					{
 						$line .= '$'. $var. '_count = sizeof('. $varref. ');';
 					}
-					$line .= "\n". 'for ($'. $var. '_i = 0; $'. $var. '_i < $'. $var. '_count; $'. $var. '_i++)';
-					$line .= "\n". '{'. "\n";
+					$line .= $lines;
 					$line .= ' $'. $var. '_item = &'. $varref. '[$'. $var. '_i];'."\n";
-					$line .= " \${$var}_item['S_ROW_COUNT'] = \${$var}_i;\n";
-					$line .= " \${$var}_item['S_NUM_ROWS'] = \${$var}_count;\n";
-					$line .= "\n?".">";
 				}
+				$line .= " \${$var}_item['S_NUM_ROWS'] = \${$var}_count;\n";
+				$line .= "\n?".">";
 				$compiled[] = $line;
 				continue;
 			}
@@ -1843,7 +1840,7 @@ class Template {
             }
         }
 
-		$code = (($elseif) ? '} elseif (' : 'if (') . (implode(' ', $tokens) . ') { ');
+		 $code = (($elseif) ? '} elseif (' : 'if (') . ((XS_USE_ISSET) ? 'isset(' . $tokens[0] . ') && ' : '') . implode(' ', $tokens) . ') { ';
 	
 		return $code;
 	}
@@ -2150,7 +2147,7 @@ class Template {
 
 	function append_block_vars($blockname, $vararray)
 	{
-		if(strstr($blockname, '.'))
+		if(strpos($blockname, '.') !== false)
 		{
 			// Nested block.
 			$blocks = explode('.', $blockname);
