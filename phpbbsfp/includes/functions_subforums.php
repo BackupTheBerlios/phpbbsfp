@@ -1,6 +1,6 @@
 <?php
 
-// $Id: functions_subforums.php,v 1.6 2004/09/02 00:04:18 dmaj007 Exp $
+// $Id: functions_subforums.php,v 1.5 2004/09/02 00:01:41 dmaj007 Exp $
 
 function display_forums($root_data = '', $display_moderators = TRUE)
 {
@@ -322,7 +322,7 @@ print_r ($db->sql_error());
 
 	$template->assign_vars(array(
 		'U_MARK_FORUMS'		=> append_sid("viewforum.$phpEx?f=" . $root_data['forum_id'] . '&amp;mark=forums'), 
-		'L_LAST_POST' => $user->lang['Last_Post'],
+
 		'S_HAS_SUBFORUM'	=>	($visible_forums) ? true : false,
 
 		'L_SUBFORUM'		=>	($visible_forums == 1) ? $user->lang['SUBFORUM'] : $user->lang['SUBFORUMS'])
