@@ -20,13 +20,13 @@
 		<th colspan="2" class="thCornerL" nowrap="nowrap">&nbsp;{L_FORUM}&nbsp;</th>
 		<th width="50" class="thTop" nowrap="nowrap">&nbsp;{L_TOPICS}&nbsp;</th>
 		<th width="50" class="thTop" nowrap="nowrap">&nbsp;{L_POSTS}&nbsp;</th>
-		<th class="thTop" nowrap="nowrap">&nbsp;{L_LAST_POST}&nbsp;</th>
+		<th class="thCornerR" nowrap="nowrap">&nbsp;{L_LAST_POST}&nbsp;</th>
 	</tr>
 	<!-- BEGIN forumrow -->
 	<!-- IF forumrow.S_IS_CAT -->
 	<tr>
-		<td class="cat" colspan="2"><h4><a href="{forumrow.U_VIEWFORUM}">{forumrow.FORUM_NAME}</a></h4></td>
-		<td class="catdiv" colspan="3">&nbsp;</td>
+		<td class="catLeft" colspan="2"><span class="cattitle"><a href="{forumrow.U_VIEWFORUM}">{forumrow.FORUM_NAME}</a></span></td>
+		<td class="rowpic" colspan="3">&nbsp;</td>
 	</tr>
 	<!-- ELSEIF forumrow.S_IS_LINK -->
 	<tr>
@@ -47,12 +47,12 @@
 		<td class="row1" width="50" align="center">{forumrow.FORUM_FOLDER_IMG}</td>
 		<td class="row1" width="100%">
 			<a class="forumlink" href="{forumrow.U_VIEWFORUM}">{forumrow.FORUM_NAME}</a>
-			<p class="forumdesc">{forumrow.FORUM_DESC}</p>
+			<p class="genmed">{forumrow.FORUM_DESC}</p>
 			<!-- IF forumrow.MODERATORS -->
-				<p class="forumdesc"><strong>{forumrow.L_MODERATOR_STR}:</strong> {forumrow.MODERATORS}</p>
+				<p class="gensmall">{forumrow.L_MODERATOR_STR}: {forumrow.MODERATORS}</p>
 			<!-- ENDIF -->
 			<!-- IF forumrow.SUBFORUMS -->
-				<p class="forumdesc"><strong>{forumrow.L_SUBFORUM_STR}</strong> {forumrow.SUBFORUMS}</p>
+				<p class="genmed">{forumrow.L_SUBFORUM_STR} {forumrow.SUBFORUMS}</p>
 			<!-- ENDIF -->
 		</td>
 		<td class="row2" align="center"><p class="gensmall">{forumrow.TOPICS}</p></td>

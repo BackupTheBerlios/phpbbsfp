@@ -2121,11 +2121,11 @@ var $block_else_level = array();
 	 */
 	function lang($var)
 	{
-		global $lang;
 		if(substr($var, 0, 2) === 'L_')
 		{
 			$var = substr($var, 2);
 			// check variable as it is
+			global $lang;
 			if(isset($lang[$var]))
 			{
 				return $lang[$var];
@@ -2143,7 +2143,6 @@ var $block_else_level = array();
 			}
 			return ''; //str_replace('_', ' ', $var);
 		}
-		return '';
 	}
 
 	//
